@@ -1,6 +1,6 @@
-schedule=1.1.0
-python-dotenv=0.20.0
-pandas=1.4.3
-matplotlib=3.4.3
-entsoe-py=0.5.8
-tweepy=4.10.1
+schedule==1.1.0
+python-dotenv==0.20.0
+pandas==1.4.3
+matplotlib==3.4.3
+entsoe-py==0.5.8
+tweepy==4.10.1
