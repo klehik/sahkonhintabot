@@ -29,7 +29,7 @@ def main():
 
     insights = data_item.generate_insights()
     hashtags = "#energia #sähkö #hinta #spot"
-    message = f"Sähkön spot-hinnat {data_item.date} (alv 0%)\nKeskihinta: {insights['mean']} snt\nPäivän alin: {insights['min']} snt\nPäivän ylin: {insights['max']} snt\n{hashtags}"
+    message = f"Sähkön spot-hinnat {data_item.date} (alv 0%)\nKeskihinta: {insights['mean']} snt/kWh\nPäivän alin: {insights['min']} snt/kWh\nPäivän ylin: {insights['max']} snt/kWh\n{hashtags}"
     print(message)
     tweet_with_image(data_item.bar_graph_path, message)
 
