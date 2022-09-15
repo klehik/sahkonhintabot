@@ -41,8 +41,7 @@ def main():
 
 
 if __name__ == "__main__":
-    wake_up_time = os.getenv("WAKE_UP")
-    schedule.every().day.at(wake_up_time).do(main)
+    schedule.every().day.at("19:14").do(main)
     while True:
         
         schedule.run_pending()
