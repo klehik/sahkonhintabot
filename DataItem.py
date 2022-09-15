@@ -84,8 +84,8 @@ class DataItem:
         # calling the function to add value labels
         add_bar_labels(x, y)
 
-        title_long = f"Pörssisähkön hinta {df['day'][0]}/{df['month'][0]} {df['hour'][0]}:00 - {df['day'][-1]}/{df['month'][-1]} {df['hour'][-1] +1}:00 (ilman ALV)" 
-        title_short = f"Pörssisähkön hinta {df['day'][0]}.{df['month'][0]} (ilman alv)" 
+        title_long = f"Pörssisähkön hinta {df['day'][0]}/{df['month'][0]} {df['hour'][0]}:00 - {df['day'][-1]}/{df['month'][-1]} {df['hour'][-1] +1}:00 (alv 0%)" 
+        title_short = f"Pörssisähkön hinta {df['day'][0]}.{df['month'][0]} (alv 0%)" 
 
         # giving title to the plot
         plt.title(title_short)
