@@ -18,7 +18,7 @@ class DataItem:
         self.country = country
         self.tz = timezone
         self.bar_graph_path = None
-        self.date = f"{self.start.day}.{self.start.month}"
+        self.date = f"{self.start.day}.{self.start.month}.{self.start.year}"
 
     def generate_insights(self):
         df = self.dataframe
@@ -55,6 +55,7 @@ class DataItem:
 
     def plot_bar_graph(self):
         df = self.dataframe
+
         def add_bar_labels(x,y):
             for i in range(len(x)):
                 plt.text(i, y[i] + 0.2, y[i], fontdict={'fontsize': 8, 'weight': 'bold'}, ha = 'center')
@@ -77,25 +78,19 @@ class DataItem:
         ax.set_xticklabels(df['hour'])
         fig.set_size_inches(12,6)
 
-
-        # making the bar chart on the data
+        # bar chart
         plt.bar(x, y, width=0.8)
-            
-        # calling the function to add value labels
         add_bar_labels(x, y)
 
-        title_long = f"Pörssisähkön hinta {df['day'][0]}/{df['month'][0]} {df['hour'][0]}:00 - {df['day'][-1]}/{df['month'][-1]} {df['hour'][-1] +1}:00 (alv 0%)" 
-        title_short = f"Pörssisähkön hinta {df['day'][0]}.{df['month'][0]} (alv 0%)" 
+        title_long = f"Pörssisähkön hinta {self.date} {df['hour'][0]}:00 - {df['day'][-1]}/{df['month'][-1]} {df['hour'][-1] +1}:00 (alv 0%)" 
+        title_short = f"Pörssisähkön hinta {self.date} (alv 0%)" 
 
-        # giving title to the plot
         plt.title(title_short)
-            
-        # X and Y labels
         plt.xlabel("Tunti")
         plt.ylabel("snt/kWh")
 
         filename = 'bar.png'
         path = f"./images/{filename}"
-        # visualizing the plot
         plt.savefig(path)
+
         self.bar_graph_path = path
