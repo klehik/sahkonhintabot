@@ -37,7 +37,7 @@ def main():
         print("The bot is not hot")
 
 if __name__ == "__main__":
-    main()
+    
     schedule.every().day.at("15:00").do(main)
     
     while True:
