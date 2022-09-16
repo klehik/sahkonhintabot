@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 from entsoe import  EntsoePandasClient
-from utils import format_price
+from utils import format_price, get_ranges
 
 class DataItem:
     def __init__(self, start, end, country, timezone) -> None:
@@ -11,7 +11,7 @@ class DataItem:
         #                  date_str      0    month day hour  price
         # 2022-09-15 00:00:00+03:00  34.16        9  15    0   3.42
 
-
+        
         self.dataframe = None
         self.start = start
         self.end = end
@@ -19,8 +19,9 @@ class DataItem:
         self.tz = timezone
         self.bar_graph_path = None
         self.date = f"{self.start.day}.{self.start.month}.{self.start.year}"
+        self.average = None
 
-    def generate_insights(self):
+    def calculte_insights(self):
         df = self.dataframe
 
         mean = df['price'].mean()
@@ -32,7 +33,31 @@ class DataItem:
         max = df['price'].max()
         max = format_price(max)
 
-        return {'mean': mean, 'min': min, 'max': max}
+        return {"mean": mean, "min": min, "max": max}
+
+    def calculate_below_average_hours(self):
+        df = self.dataframe
+        df.index = df['hour']
+        df3 = df[df['price'] < df['price'].mean()]
+
+        ranges = get_ranges(df3.index)
+
+            
+            
+        periods = []
+        for r in ranges:
+            start = r[0]
+            end = r[1]
+            
+            prices = [df.iloc[i].price for i in range(start, end+1)]
+            mean = sum(prices)/len(prices)
+            periods.append((start, end+1, round(mean, 2)))
+    
+
+        return periods
+        
+
+        
         
 
     def get_market_price_dataframe(self):
@@ -48,17 +73,17 @@ class DataItem:
         df['month'] = df.index.month
         df['day'] = df.index.day
         df['hour'] = df.index.hour
-        df['price'] = round(df[0]/10, 2)
+        df['price'] = round(df[0]/10, 2) 
         print(df)
         self.dataframe = df
-
+        
 
     def plot_bar_graph(self):
         df = self.dataframe
 
         def add_bar_labels(x,y):
             for i in range(len(x)):
-                plt.text(i, y[i] + 0.2, y[i], fontdict={'fontsize': 8, 'weight': 'bold'}, ha = 'center')
+                plt.text(i, y[i] + 0.2, y[i], fontdict={"fontsize": 8, "weight": "bold"}, ha = "center")
 
         x = df['date_str']
         y = df['price']
@@ -67,19 +92,33 @@ class DataItem:
         MEDIUM_SIZE = 14
         LARGE_SIZE = 18
 
-        plt.rc('font', size=LARGE_SIZE)          # controls default text sizes
-        #plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
-        plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-        plt.rc('xtick', labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
-        plt.rc('ytick', labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
+        plt.rc("font", size=LARGE_SIZE)          # controls default text sizes
+        #plt.rc("axes", titlesize=SMALL_SIZE)     # fontsize of the axes title
+        plt.rc("axes", labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+        plt.rc("xtick", labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
+        plt.rc("ytick", labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
 
-
+       
         fig, ax = plt.subplots()
         ax.set_xticklabels(df['hour'])
         fig.set_size_inches(12,6)
 
+        mean = df['price'].mean()
         # bar chart
-        plt.bar(x, y, width=0.8)
+
+        col = []
+        for val in y:
+            if val < mean * 0.7:
+                col.append('green')
+            elif val < mean:
+                col.append('orange')
+            else:
+                col.append('red')
+
+        # col looks like this: ['blue', 'blue', 'blue', 'blue', 'red', 'red', 'red', 'green', 'green', 'green']
+
+        plt.bar(x, y, color = col)
+        
         add_bar_labels(x, y)
 
         title_long = f"Pörssisähkön hinta {self.date} {df['hour'][0]}:00 - {df['day'][-1]}/{df['month'][-1]} {df['hour'][-1] +1}:00 (alv 0%)" 
@@ -87,7 +126,8 @@ class DataItem:
 
         plt.title(title_short)
         plt.xlabel("Tunti")
-        plt.ylabel("snt/kWh")
+        plt.ylabel("Hinta snt/kWh")
+        
 
         filename = 'bar.png'
         path = f"./images/{filename}"
