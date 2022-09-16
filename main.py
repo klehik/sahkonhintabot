@@ -15,16 +15,17 @@ def main():
 
     is_hot = True if os.getenv("HOT") == 'True' else False
     
-
+   
     now = datetime.now()
-    tomororrow_0 = datetime(now.year, now.month, now.day+1, 0)
     delta = timedelta(days=1)
+    tomororrow = datetime(now.year, now.month, now.day, 0) + delta
+
     country = "FI"
     tz="Europe/Helsinki"
    
-
-    data_item = DataItem(start=tomororrow_0, end=tomororrow_0+delta, country=country, timezone=tz)
+    data_item = DataItem(start=tomororrow, end=tomororrow+delta, country=country, timezone=tz)
     data_item.get_market_price_dataframe()
+    # TODO: bar_graph_path = data_item.plot_bar_graph
     data_item.plot_bar_graph()
     
     message = compile_message(data_item)
@@ -37,7 +38,6 @@ def main():
         print("The bot is not hot")
 
 if __name__ == "__main__":
-    
     schedule.every().day.at("15:00").do(main)
     
     while True:
