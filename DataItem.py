@@ -4,6 +4,7 @@ import os
 import pandas as pd
 from entsoe import  EntsoePandasClient
 from utils import format_price, get_ranges
+from PIL import Image
 
 class DataItem:
     def __init__(self, start, end, country, timezone) -> None:
@@ -11,7 +12,6 @@ class DataItem:
         #                  date_str      0    month day hour  price
         # 2022-09-15 00:00:00+03:00  34.16        9  15    0   3.42
 
-        
         self.dataframe = None
         self.start = start
         self.end = end
@@ -19,7 +19,6 @@ class DataItem:
         self.tz = timezone
         self.bar_graph_path = None
         self.date = f"{self.start.day}.{self.start.month}.{self.start.year}"
-        self.average = None
 
     def calculte_insights(self):
         df = self.dataframe
@@ -41,8 +40,6 @@ class DataItem:
         df3 = df[df['price'] < df['price'].mean()]
 
         ranges = get_ranges(df3.index)
-
-            
             
         periods = []
         for r in ranges:
@@ -55,9 +52,6 @@ class DataItem:
     
 
         return periods
-        
-
-        
         
 
     def get_market_price_dataframe(self):
@@ -88,40 +82,32 @@ class DataItem:
         x = df['date_str']
         y = df['price']
 
-        SMALL_SIZE = 10
-        MEDIUM_SIZE = 14
-        LARGE_SIZE = 18
-
-        plt.rc("font", size=LARGE_SIZE)          # controls default text sizes
-        #plt.rc("axes", titlesize=SMALL_SIZE)     # fontsize of the axes title
-        plt.rc("axes", labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-        plt.rc("xtick", labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
-        plt.rc("ytick", labelsize=MEDIUM_SIZE)    # fontsize of the tick labels
-
+        plt.rc("font", size=18)          # controls default text sizes
+        
+        plt.rc("axes", labelsize=14)    # fontsize of the x and y labels
+        plt.rc("xtick", labelsize=14)    # fontsize of the tick labels
+        plt.rc("ytick", labelsize=14)    # fontsize of the tick labels
        
         fig, ax = plt.subplots()
         ax.set_xticklabels(df['hour'])
         fig.set_size_inches(12,6)
-
-        mean = df['price'].mean()
+       
         # bar chart
-
         col = []
         for val in y:
-            if val < mean * 0.7:
+            if val < 10:
                 col.append('green')
-            elif val < mean:
+            elif val <= 20:
                 col.append('orange')
             else:
                 col.append('red')
 
-        # col looks like this: ['blue', 'blue', 'blue', 'blue', 'red', 'red', 'red', 'green', 'green', 'green']
 
         plt.bar(x, y, color = col)
         
         add_bar_labels(x, y)
 
-        title_long = f"Pörssisähkön hinta {self.date} {df['hour'][0]}:00 - {df['day'][-1]}/{df['month'][-1]} {df['hour'][-1] +1}:00 (alv 0%)" 
+        # title_long = f"Pörssisähkön hinta {self.date} {df['hour'][0]}:00 - {df['day'][-1]}/{df['month'][-1]} {df['hour'][-1] +1}:00 (alv 0%)" 
         title_short = f"Pörssisähkön hinta {self.date} (alv 0%)" 
 
         plt.title(title_short)
@@ -132,5 +118,27 @@ class DataItem:
         filename = 'bar.png'
         path = f"./images/{filename}"
         plt.savefig(path)
+
+        im1 = Image.open(path)
+        im2 = Image.open('./images/legend_sb3.png')
+
+        legend_is_on_bars = False
+
+        max = df['price'].max()
+        treshold = max * 0.70
+        print('legend_treshold', treshold)
+        for val in y[0:5]:
+            if val > treshold:
+                legend_is_on_bars = True
+
+        if legend_is_on_bars:
+            legend_x = 8
+            legend_y = 12
+        else:
+            legend_x = 170
+            legend_y = 90
+
+        im1.paste(im2, (legend_x, legend_y))
+        im1.save(path)
 
         self.bar_graph_path = path
