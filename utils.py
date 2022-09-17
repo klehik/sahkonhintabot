@@ -22,20 +22,20 @@ def compile_message(data_item):
     range_str = ''
 
     if len(below_average_periods) > 1:
-        range_str = "Ajanjaksot"
+        range_str = "Ajanjaksot, joissa"
     else:
-        range_str = "Ajanjakso"
+        range_str = "Ajanjakso, jossa"
 
     message = f"Sähkön spot-hinnat {data_item.date} snt/kWh (alv 0%)\n"
     message+= f"Keskihinta: {insights['mean']}\n"
     message+= f"Alin: {insights['min']}\n"
     message+= f"Ylin: {insights['max']}\n\n"
 
-    message+= f"{range_str}, jossa hinta alle vuorokauden keskiarvon\n"
+    message+= f"{range_str} hinta alle vuorokauden keskiarvon\n"
     for r in below_average_periods:
         mean = str(r[2]).replace('.',',')
         message+= f"{str(r[0])}.00 - {str(r[1])}.00, keskihinta {mean}\n"
-        
-    message+= "\n#energia #sähkö #hinta"
+
+    message+= "\n#energia #sähkö"
 
     return message
