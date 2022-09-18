@@ -115,7 +115,7 @@ class DataItem:
         plt.ylabel("Hinta snt/kWh")
         
 
-        filename = 'bar.png'
+        filename = f'{self.date}.png'
         path = f"./images/{filename}"
         plt.savefig(path)
 
