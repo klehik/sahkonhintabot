@@ -39,3 +39,14 @@ def compile_message(data_item):
     message+= "\n#energia #sähkö"
 
     return message
+
+def compile_reply():
+    now = datetime.now()
+
+    img_path = f"./images/{str(now.day)}.{str(now.month)}.{str(now.year)}.png"
+
+    message = f"Pörssisähkön spot-hinnat tänään"
+
+    return message, img_path
+
+
