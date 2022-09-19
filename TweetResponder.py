@@ -26,7 +26,7 @@ class TweetResponder(tweepy.StreamingClient):
             print(img_path)
             #client.create_tweet(in_reply_to_tweet_id=tweet.id, text=message, media_ids=[media.media_id])
             print('Replying to tweet')
-            database.add_tweet(tweet.text, True)
+            
         else:
             database.add_tweet(tweet.text, False)
 
@@ -60,6 +60,7 @@ class TweetResponder(tweepy.StreamingClient):
                     print(keyword)
                     is_match = True
             if is_match:
+                database.add_tweet(tweet.text, True)
                 if database.find_id(tweet.conversation_id):
                     print("The bot has replied already in this conversation")
                 else:
