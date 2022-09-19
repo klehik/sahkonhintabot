@@ -1,4 +1,4 @@
-from operator import is_
+
 from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
@@ -47,6 +47,7 @@ def main():
 
 if __name__ == "__main__":
     load_dotenv(".env")
+
     
     schedule.every().day.at("14:30").do(main)
 
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     rule = tweepy.StreamRule(value="sähkö lang:fi -is:retweet -is:quote")
     responder.add_rules(rule)
     print(responder.get_rules())
-    responder.filter(tweet_fields="conversation_id")
+    responder.filter(tweet_fields="conversation_id", threaded=True)
 
     
     
