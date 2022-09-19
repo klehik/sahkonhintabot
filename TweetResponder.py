@@ -19,14 +19,16 @@ class TweetResponder(tweepy.StreamingClient):
         tweet.text = tweet.text.lower()
 
         if self.tweet_has_keywords(tweet) and not self.replying_to_self(tweet):
-            client = twitter_client()
+            #client = twitter_client()
             message, img_path = compile_reply()
-            api = twitter_api()
+            #api = twitter_api()
             #media = api.media_upload(img_path)
             print(img_path)
             #client.create_tweet(in_reply_to_tweet_id=tweet.id, text=message, media_ids=[media.media_id])
             print('Replying to tweet')
-        
+            database.add_tweet(tweet.text, True)
+        else:
+            database.add_tweet(tweet.text, False)
 
 
  
@@ -47,6 +49,8 @@ class TweetResponder(tweepy.StreamingClient):
 
 
     def tweet_has_keywords(self, tweet):
+
+        # kallis sähkö, 
         keywords = ['hinta', 'kallis', 'halpa', 'hinn', 'kwh', 'pörssi']
         is_match = False
         tweet.text = tweet.text.lower()
