@@ -13,8 +13,6 @@ class TweetResponder(tweepy.StreamingClient):
     
     
     def on_tweet(self, tweet):
-        system('say tweet received')
-        
         print(tweet.data)
         tweet.text = tweet.text.lower()
 
@@ -51,7 +49,7 @@ class TweetResponder(tweepy.StreamingClient):
     def tweet_has_keywords(self, tweet):
 
         # kallis sähkö, 
-        keywords = ['hinta', 'kallis', 'halpa', 'hinn', 'kwh', 'pörssi']
+        keywords = ['kwh']
         is_match = False
         tweet.text = tweet.text.lower()
         if 'sähkö' in tweet.text:
