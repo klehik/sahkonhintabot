@@ -33,8 +33,14 @@ def twitter_client():
 def tweet_with_image(image_path: str, message: str):
     print("Tweeting..")
     api = twitter_api()
-    api.update_status_with_media(message ,image_path)
+    return api.update_status_with_media(message ,image_path)
+    
     #os.remove(image_path)
+
+
+def retweet(id):
+    api = twitter_api()
+    api.retweet(id)
 
 
 def get_tweet(id):
@@ -48,7 +54,7 @@ def get_tweet(id):
 
 def get_conversation_id(id):
     tweet = get_tweet(id)
-    return  tweet.data.conversation_id
+    return tweet.data.conversation_id
 
 
 def get_users_from_tweet(id):
