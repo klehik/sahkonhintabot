@@ -15,12 +15,12 @@ def get_ranges(nums):
     return list(zip(edges, edges))
 
 
-def compile_message(data_item):
-    insights = data_item.calculte_insights()
-    below_average_periods = data_item.calculate_below_average_hours()
+def compile_day_ahead_message(data_item):
+    insights = data_item.insights
+    below_average_periods = data_item.calculate_below_average_periods()
+    num_of_periods = len(below_average_periods)
 
     range_str = ''
-
     if len(below_average_periods) > 1:
         range_str = "Ajanjaksot, joissa"
     else:
@@ -31,7 +31,9 @@ def compile_message(data_item):
     message+= f"Alin: {insights['min']}\n"
     message+= f"Ylin: {insights['max']}\n\n"
 
-    if len(below_average_periods) <= 3:
+    
+
+    if num_of_periods <= 3 and num_of_periods > 0:
 
         message+= f"{range_str} hinta pysyttelee alle vuorokauden keskiarvon\n"
         for r in below_average_periods:
