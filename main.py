@@ -1,4 +1,5 @@
 
+from tabnanny import check
 from dotenv import load_dotenv
 import os
 from datetime import datetime, timedelta
@@ -6,14 +7,22 @@ import schedule
 import time
 from DataItem import DataItem
 from twitter import tweet_with_image, retweet
-from utils import compile_day_ahead_message
+from utils import *
 import tweepy
 import database
 from entso_api import *
 from TweetResponder import TweetResponder
 
 
+def check_if_last_day_of_month():
+    now = datetime.now()
+    is_last_day_of_month = True if now.day == get_days_in_month(now) else False
 
+    if is_last_day_of_month:
+       
+        tweet_monthly_report(now)
+
+       
 
 
 def tweet_day_ahead_report():
@@ -22,8 +31,8 @@ def tweet_day_ahead_report():
 
     now = datetime.now()
     one_day = timedelta(days=1)
-    tomorrow = now+one_day
-    data_item = get_day(tomorrow)
+    tomorrow = now+one_day  
+    data_item = get_day(now)
     
 
     if not data_item.dataframe.empty:
@@ -36,7 +45,7 @@ def tweet_day_ahead_report():
         print(message, len(message))
         if is_hot:
             res = tweet_with_image(data_item.bar_graph_path, message)
-            tweet_id = res['id']
+            tweet_id = res.id
             database.add_insights(data_item, tweet_id)
         else:
             print("The bot is not hot")
@@ -46,34 +55,67 @@ def tweet_day_ahead_report():
         tweet_day_ahead_report()
 
 
+def tweet_monthly_report(now):
+
+    is_hot = True if os.getenv("HOT") == 'True' else False
+
+    one_month = timedelta(days=35)
+
+    # current month
+    data_item_current = get_month(now)
+
+    # previous month
+    data_item_previous = get_month(now-one_month)
+    
+    
+    graph_settings = {"hourly": False, "label_rotation": 45, "bars_from_start": 6, "bar_label_font_size": 6}
+    #graph_settings = {"hourly": True, "label_rotation": 45, "bars_from_start": 120}
+
+    data_item_current.plot_bar_graph(graph_settings)
+    message = compile_monthly_message(data_item_current, data_item_previous)
+
+    if is_hot:
+        res = tweet_with_image(data_item_current.bar_graph_path, message)
+        tweet_id = res.id
+        database.add_insights(data_item_current, tweet_id)
+    
+    else:
+        print("The bot is not hot")
+
 
 def tweet_weekly_report():
+
+    is_hot = True if os.getenv("HOT") == 'True' else False
+
+    one_week = timedelta(days=7)
+    
     now = datetime.now()
-    end = datetime(now.year, now.month, now.day)
-    data_item = get_7(end=end)
+    
+
+    # current week
+    data_item_current = get_week(now)
+
+    # previous week
+    data_item_previous = get_week(now-one_week)
     
     #graph_settings = {"hourly": False, "label_rotation": 0, "bars_from_start": 2}
     graph_settings = {"hourly": True, "label_rotation": 0, "bars_from_start": 32}
     
-    data_item.plot_bar_graph(graph_settings)
-    print(data_item.insights)
-    #database.add_insights(data_item)
+    data_item_current.plot_bar_graph(graph_settings)
+    
+    message = compile_weekly_message(data_item_current, data_item_previous)
+    print(message)
+
+    if is_hot:
+        res = tweet_with_image(data_item_current.bar_graph_path, message)
+        tweet_id = res.id
+        database.add_insights(data_item_current, tweet_id)
+    
+    else:
+        print("The bot is not hot")
 
 
-def tweet_monthly_report():
-    now = datetime.now()
-    end = datetime(now.year, now.month, now.day+1)
-    data_item = get_28(end=end)
-    
-    graph_settings = {"hourly": False, "label_rotation": 45, "bars_from_start": 6}
-    #graph_settings = {"hourly": True, "label_rotation": 45, "bars_from_start": 120}
-    
-    data_item.plot_bar_graph(graph_settings)
-    print(data_item.insights)
-    
-    #tweet_monthly_report()
-    #tweet_weekly_report()
-    #tweet_day_ahead_report()
+
     
 def retweet_day_report():
     now = datetime.now()
@@ -93,8 +135,10 @@ if __name__ == "__main__":
     
     schedule.every().day.at("14:10").do(tweet_day_ahead_report)
     schedule.every().day.at("07:00").do(retweet_day_report)
+    schedule.every().day.at("11:00").do(check_if_last_day_of_month)
+    schedule.every().sunday.at("12:00").do(tweet_weekly_report)
 
-    bearer = os.getenv("TWITTER_BEARER")
+    """ bearer = os.getenv("TWITTER_BEARER")
 
     # clear stream rules
     a = tweepy.StreamingClient(bearer)
@@ -109,7 +153,7 @@ if __name__ == "__main__":
     rule = tweepy.StreamRule(value="sähkö lang:fi -is:retweet -is:quote")
     responder.add_rules(rule)
     print(responder.get_rules())
-    responder.filter(tweet_fields="conversation_id", threaded=True)
+    responder.filter(tweet_fields="conversation_id", threaded=True) """
 
     
     

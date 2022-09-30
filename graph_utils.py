@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 
-def add_bar_labels(x,y):
+def add_bar_labels(x,y, fontsize):
     for i in range(len(x)):
-        plt.text(i, y[i] + 0.2, y[i], fontdict={"fontsize": 8, "weight": "bold"}, ha = "center")
+        plt.text(i, y[i] + 0.2, y[i], fontdict={"fontsize": fontsize, "weight": "bold"}, ha = "center")
     
 def legend_position(y, max, bars_from_start):
     legend_is_on_bars = False

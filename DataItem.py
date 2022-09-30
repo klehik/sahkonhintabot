@@ -3,34 +3,35 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 from entsoe import  EntsoePandasClient
-from utils import format_price, get_ranges
+from utils import format_price, get_ranges, get_month_name
 from PIL import Image
 import database
 import numpy as np
 from graph_utils import add_bar_labels, legend_position
 
 class DataItem:
-    def __init__(self, start, end, days) -> None:
+    def __init__(self, start, end, title) -> None:
         self.dataframe = None
         self.start = start
         self.end = end
         self.country = os.getenv("COUNTRY")
         self.tz = os.getenv("TIMEZONE")
         self.bar_graph_path = None
-        self.timeframe_str = ""
+        self.timeframe_str = f"{self.start.day}-{self.start.month}-{self.start.year}-{self.end.day}-{self.end.month}-{self.end.year}"
         self.insights = None
+        self.title = title
 
     def calculte_insights(self):
         df = self.dataframe
 
         mean = df['price'].mean()
-        mean = format_price(mean)
+    
 
         min = df['price'].min()
-        min = format_price(min)
+       
 
         max = df['price'].max()
-        max = format_price(max)
+       
 
         self.insights = {"mean": mean, "min": min, "max": max}
     
@@ -128,8 +129,8 @@ class DataItem:
         self.bar_graph_path = path
 
 class Day(DataItem):
-    def __init__(self, start, end, days):
-        super().__init__(start, end, days)
+    def __init__(self, start, end, title):
+        super().__init__(start, end, title)
         self.date = f"{self.start.day}.{self.start.month}.{self.start.year}"
         self.timeframe_str = f"{self.start.day}.{self.start.month}.{self.start.year}" 
     
@@ -155,10 +156,10 @@ class Day(DataItem):
         return periods
 
 class Timespan(DataItem):
-    def __init__(self, start, end, days):
-        super().__init__(start, end, days)
-        self.days = days
-        self.timeframe_str = f"{self.start.day}.{self.start.month}. - {self.end.day}.{self.end.month}.{self.end.year}"
+    def __init__(self, start, end, title):
+        super().__init__(start, end, title)
+        self.title = title
+        
 
     
 
@@ -179,14 +180,12 @@ class Timespan(DataItem):
 
         if settings['hourly']:
             x = df['date_str']
-            y = df['price']
-            title = f"{self.days} vrk:n tuntihinnat (alv 0%)"
+            y = df['price']  
             plt.xlabel("Tunti")
             
         else:
             x = df2['xtick_label'].tolist()
             y = df2['average_price']
-            title = f"{self.days} vrk:n päivittäiset keskihinnat (alv 0%)"
             plt.xlabel("Päivä")
 
         plt.rc("font", size=18)          # controls default text sizes 
@@ -211,12 +210,12 @@ class Timespan(DataItem):
 
         plt.bar(x, y, color = col)
         if not settings['hourly']:
-            add_bar_labels(x, y)
+            add_bar_labels(x, y, settings['bar_label_font_size'])
 
 
 
         fig.set_size_inches(12,6)
-
+        title = f"{self.title} (alv 0%)"
         plt.title(title)
 
         if settings['hourly']:
@@ -225,7 +224,7 @@ class Timespan(DataItem):
         plt.ylabel("Hinta snt/kWh")
         
 
-        filename = f'{self.days}.png'
+        filename = f'{self.timeframe_str}.png'
         path = f"./images/{filename}"
         plt.savefig(path)
 
