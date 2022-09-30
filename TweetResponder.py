@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import tweepy
 import os
 import database
-from utils import compile_reply
+from message import compile_reply
 from os import system
 
 

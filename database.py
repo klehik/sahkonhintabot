@@ -66,16 +66,12 @@ def add_insights(data_item, tweet_id):
     print(in_database)
     if not in_database:
 
+        insights_document = data_item.insights
 
-        insights_document = {
-            "date": data_item.timeframe_str,
-            "tweet_id": tweet_id,
-            "mean": data_item.insights['mean'],
-            "min": data_item.insights['min'],
-            "max": data_item.insights['max']
-        }
 
-        
+        insights_document['date']: data_item.timeframe_str
+        insights_document['tweet_id']: tweet_id
+           
 
         res = insights.insert_one(insights_document)
         print(res)

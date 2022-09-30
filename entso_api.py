@@ -1,10 +1,9 @@
 from datetime import timedelta, datetime
-import os
 
-from matplotlib.pyplot import title
+
 from DataItem import Day, Timespan
-import calendar
-from utils import get_month_name, get_days_in_month
+
+from utils import get_month_name
 
 def get_day(date: datetime):
     
@@ -27,13 +26,6 @@ def get_week(date):
 
     return data_item
 
-def get_28(end: datetime):
-    one_month = timedelta(days=28)
-    title = f"Pörssisähkön 28 vrk:n keskihinnat"
-    data_item = Timespan(start=end-one_month, end=end, title=title)
-    data_item.init_data_item()
-
-    return data_item
 
 def get_month(date):
 
@@ -47,6 +39,10 @@ def get_month(date):
     data_item.init_data_item()
 
     return data_item
+
+
+
+
 
 
 

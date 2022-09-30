@@ -5,9 +5,9 @@ import os
 from datetime import datetime, timedelta
 import schedule
 import time
-from DataItem import DataItem
 from twitter import tweet_with_image, retweet
-from utils import *
+from utils import get_days_in_month
+from message import *
 import tweepy
 import database
 from entso_api import *
@@ -32,7 +32,7 @@ def tweet_day_ahead_report():
     now = datetime.now()
     one_day = timedelta(days=1)
     tomorrow = now+one_day  
-    data_item = get_day(now)
+    data_item = get_day(tomorrow)
     
 
     if not data_item.dataframe.empty:

@@ -1,11 +1,11 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
 from entsoe import  EntsoePandasClient
-from utils import format_price, get_ranges, get_month_name
+from utils import get_ranges
 from PIL import Image
-import database
+
 import numpy as np
 from graph_utils import add_bar_labels, legend_position
 
@@ -25,11 +25,7 @@ class DataItem:
         df = self.dataframe
 
         mean = df['price'].mean()
-    
-
         min = df['price'].min()
-       
-
         max = df['price'].max()
        
 
@@ -132,7 +128,9 @@ class Day(DataItem):
     def __init__(self, start, end, title):
         super().__init__(start, end, title)
         self.date = f"{self.start.day}.{self.start.month}.{self.start.year}"
-        self.timeframe_str = f"{self.start.day}.{self.start.month}.{self.start.year}" 
+        self.timeframe_str = f"{self.start.day}.{self.start.month}.{self.start.year}"
+        self.avg_7_day = self.get_7_avg()
+        self.avg_28_day = self.get_28_avg()
     
 
     def calculate_below_average_periods(self):
@@ -154,6 +152,35 @@ class Day(DataItem):
     
 
         return periods
+
+    def calculte_insights(self):
+        df = self.dataframe
+
+        mean = df['price'].mean()
+        min = df['price'].min()
+        max = df['price'].max()
+
+        self.insights = {"mean": mean, "min": min, "max": max, "avg_7_day": self.avg_7_day, "avg_28_day": self.avg_28_day}
+
+
+    def get_7_avg(self):
+        
+        one_week = timedelta(days=7)
+        title = f"Pörssisähkön 7 vrk:n keskihinnat"
+        data_item = Timespan(start=self.end-one_week, end=self.end, title=title)
+        data_item.init_data_item()
+
+        return data_item.insights['mean']
+
+
+    def get_28_avg(self):
+        
+        one_month = timedelta(days=28)
+        title = f"Pörssisähkön 28 vrk:n keskihinnat"
+        data_item = Timespan(start=self.end-one_month, end=self.end, title=title)
+        data_item.init_data_item()
+
+        return data_item.insights['mean']
 
 class Timespan(DataItem):
     def __init__(self, start, end, title):

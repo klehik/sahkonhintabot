@@ -16,4 +16,5 @@ def legend_position(y, max, bars_from_start):
         return 8, 12
     else:
         return 170,90
-        
+
+
