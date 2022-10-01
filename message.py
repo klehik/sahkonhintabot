@@ -5,7 +5,7 @@ def compile_day_ahead_message(data_item):
     insights = data_item.insights
     below_average_periods = data_item.calculate_below_average_periods()
     #num_of_periods = len(below_average_periods)
-    hashtags = "#energia #sähkö #hinta"
+    hashtags = "#sähkö #energia"
     
     mean = format_price(insights['mean'])
     min = format_price(insights['min'])
@@ -17,7 +17,7 @@ def compile_day_ahead_message(data_item):
     else:
         range_str = "Ajanjakso, jossa"
 
-    message = f"Sähkön spot-hinnat {data_item.date}, snt/kWh (alv 0%)\n"
+    message = f"Spot-hinnat {data_item.date}, snt/kWh (alv 0%)\n"
     message += f"Alin: {min}\n"
     message += f"Ylin: {max}\n"
     message += f"Keskihinta: {mean}\n\n"
@@ -28,10 +28,10 @@ def compile_day_ahead_message(data_item):
 
     
 
-    below_average_message = f"Hinta pysyttelee alle vuorokauden keskiarvon\n"
+    below_average_message = f"{range_str} hinta pysyttelee alle vrk:n keskiarvon\n"
     for r in below_average_periods:
         mean = str(r[2]).replace('.',',')
-        below_average_message+= f"{str(r[0])}.00 - {str(r[1])}.00, keskihinta {mean}\n"
+        below_average_message+= f"{str(r[0])}.00 - {str(r[1])}.00, ka. {mean}\n"
 
 
     if (len(message) + len(below_average_message)) < 280:

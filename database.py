@@ -69,8 +69,8 @@ def add_insights(data_item, tweet_id):
         insights_document = data_item.insights
 
 
-        insights_document['date']: data_item.timeframe_str
-        insights_document['tweet_id']: tweet_id
+        insights_document['date'] = data_item.timeframe_str
+        insights_document['tweet_id'] = tweet_id
            
 
         res = insights.insert_one(insights_document)
