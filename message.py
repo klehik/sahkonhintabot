@@ -23,15 +23,15 @@ def compile_day_ahead_message(data_item):
     message += f"Keskihinta: {mean}\n\n"
     
 
-    message +=f"7vrk keskihinta: {format_price(data_item.avg_7_day)}\n"
-    message +=f"28vrk keskihinta: {format_price(data_item.avg_28_day)}\n\n"
+    #message +=f"7vrk keskihinta: {format_price(data_item.avg_7_day.insights['mean'])}\n"
+    #message +=f"28vrk keskihinta: {format_price(data_item.avg_28_day.insights['mean'])}\n\n"
 
     
 
-    below_average_message = f"{range_str} hinta pysyttelee alle vrk:n keskiarvon\n"
+    below_average_message = f"{range_str} hinta pysyttelee alle vuorokauden keskiarvon\n"
     for r in below_average_periods:
         mean = str(r[2]).replace('.',',')
-        below_average_message+= f"{str(r[0])}.00 - {str(r[1])}.00, ka. {mean}\n"
+        below_average_message+= f"{str(r[0])}.00 - {str(r[1])}.00, keskihinta {mean}\n"
 
 
     if (len(message) + len(below_average_message)) < 280:
@@ -41,6 +41,27 @@ def compile_day_ahead_message(data_item):
         message += f"\n{hashtags}"
     
 
+    return message
+
+def compile_today_reply_message():
+    
+    message = "Tuntihinnat tänään"
+    return message
+
+def compile_28_day_reply_message(data_item):
+    insights = data_item.insights
+    mean = format_price(insights['mean'])
+    min = format_price(insights['min'])
+    max = format_price(insights['max'])
+
+    message = f"28 vuorokauden keskihinta: {mean} snt/kWh"
+    return message
+
+    pass
+def compile_7_day_reply_message(data_item):
+    insights = data_item.insights
+    mean = format_price(insights['mean'])
+    message = f"7 vuorokauden keskihinta: {mean} snt/kWh"
     return message
 
 def compile_monthly_message(data_item_current, data_item_previous):

@@ -2,6 +2,7 @@ import tweepy
 import os
 
 def twitter_api():
+    # Twitter API v1
     print("Setting up twitter API connection..")
     access_token = os.getenv("ACCESS_TOKEN")
     access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
@@ -17,6 +18,7 @@ def twitter_api():
     return api
 
 def twitter_client():
+    # Twitter API v2
     bearer = os.getenv("TWITTER_BEARER")
     access_token = os.getenv("ACCESS_TOKEN")
     access_token_secret = os.getenv("ACCESS_TOKEN_SECRET")
@@ -28,6 +30,14 @@ def twitter_client():
   
    
     return client
+
+
+def reply_to_tweet(message, image_path, tweet_id):
+
+    print("Replying")
+    api = twitter_api()
+    return api.update_status_with_media(status=message ,filename=image_path, in_reply_to_status_id=tweet_id)
+
 
 
 def tweet_with_image(image_path: str, message: str):

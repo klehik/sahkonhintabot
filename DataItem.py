@@ -47,10 +47,12 @@ class DataItem:
         df['day'] = df.index.day
         df['year'] = df.index.year
         df['hour'] = df.index.hour
-        df['price'] = round(df['price_€/MWh']/10, 2) 
+        df['price_tax_0'] = round(df['price_€/MWh']/10, 2)
+        df['price_tax_24'] = round(df['price_€/MWh']*1.24 / 10, 2)
+        df['price_tax_10'] = round(df['price_€/MWh']*1.1 / 10, 2)
+        df['price'] = df['price_tax_0']
         print(df)
         self.dataframe = df
-        df.to_csv('data.csv')
         self.calculte_insights()
 
     def plot_bar_graph(self, settings):
@@ -101,7 +103,7 @@ class DataItem:
         plt.savefig(path)
 
         im1 = Image.open(path)
-        im2 = Image.open('./images/legend_sb3.png')
+        im2 = Image.open('./resources/legend_sb3.png')
 
         legend_is_on_bars = False
 
@@ -166,11 +168,11 @@ class Day(DataItem):
     def get_7_avg(self):
         
         one_week = timedelta(days=7)
-        title = f"Pörssisähkön 7 vrk:n keskihinnat"
+        title = f"Pörssisähkön 7 vrk:n tuntihinnat"
         data_item = Timespan(start=self.end-one_week, end=self.end, title=title)
         data_item.init_data_item()
 
-        return data_item.insights['mean']
+        return data_item
 
 
     def get_28_avg(self):
@@ -180,7 +182,7 @@ class Day(DataItem):
         data_item = Timespan(start=self.end-one_month, end=self.end, title=title)
         data_item.init_data_item()
 
-        return data_item.insights['mean']
+        return data_item
 
 class Timespan(DataItem):
     def __init__(self, start, end, title):
@@ -256,7 +258,7 @@ class Timespan(DataItem):
         plt.savefig(path)
 
         im1 = Image.open(path)
-        im2 = Image.open('./images/legend_sb3.png')
+        im2 = Image.open('./resources/legend_sb3.png')
 
       
 
