@@ -69,7 +69,6 @@ def tweet_day_ahead_report():
         graph_settings = {"bar_labels": True}
         data_item.plot_bar_graph(graph_settings)
         message = compile_day_ahead_message(data_item)
-        reply_additional_info(data_item)
         
         print(message, len(message))
         if is_hot:
