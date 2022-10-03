@@ -178,7 +178,7 @@ class Day(DataItem):
     def get_28_avg(self):
         
         one_month = timedelta(days=28)
-        title = f"Pörssisähkön 28 vrk:n keskihinnat"
+        title = f"Pörssisähkön päiväkohtaiset keskihinnat"
         data_item = Timespan(start=self.end-one_month, end=self.end, title=title)
         data_item.init_data_item()
 
