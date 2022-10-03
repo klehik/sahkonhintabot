@@ -166,11 +166,11 @@ def retweet_day_report():
 
 if __name__ == "__main__":
     load_dotenv(".env")
-    tweet_day_ahead_report()
-    """ schedule.every().day.at("14:10").do(tweet_day_ahead_report)
+    
+    schedule.every().day.at("14:10").do(tweet_day_ahead_report)
     schedule.every().day.at("07:00").do(retweet_day_report)
     schedule.every().day.at("11:00").do(check_if_last_day_of_month)
-    schedule.every().sunday.at("12:00").do(tweet_weekly_report) """
+    #schedule.every().sunday.at("12:00").do(tweet_weekly_report)
 
     """ bearer = os.getenv("TWITTER_BEARER")
 
@@ -191,8 +191,8 @@ if __name__ == "__main__":
 
     
     
-    """ while True:
+    while True:
         
         schedule.run_pending()
-        time.sleep(1) """
+        time.sleep(1)
         
