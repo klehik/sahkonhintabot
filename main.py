@@ -72,10 +72,7 @@ def tweet_day_ahead_report():
         
         print(message, len(message))
         if is_hot:
-
-            today_img_path = f"./images/{now.day}.{now.month}.{now.year}.png"
-            media_ids = upload_media(files=[data_item.bar_graph_path, today_img_path])
-            res = tweet_with_multi_image(media_ids=media_ids, message=message)
+            res = tweet_with_image(data_item.bar_graph_path, message)
             tweet_id = res.id
             reply_additional_info(data_item, tweet_id)
             database.add_insights(data_item, tweet_id)
