@@ -31,6 +31,20 @@ def twitter_client():
    
     return client
 
+def upload_media(files):
+    media_ids = []
+
+    api = twitter_api()
+    for file in files:
+        media = api.media_upload(file)
+        media_ids.append(media.media_id)
+    return media_ids
+
+
+def tweet_with_multi_image(media_ids, message):
+    api=twitter_api()
+    return api.update_status(status=message, media_ids=media_ids)
+    
 
 def reply_to_tweet(message, image_path, tweet_id):
 
@@ -51,7 +65,7 @@ def tweet_with_image(image_path: str, message: str):
 def retweet(id):
     api = twitter_api()
     api.retweet(id)
-
+    
 
 def get_tweet(id):
 

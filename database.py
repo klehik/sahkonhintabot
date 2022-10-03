@@ -66,7 +66,7 @@ def add_insights(data_item, tweet_id):
     print(in_database)
     if not in_database:
 
-        insights_document = data_item.insights
+        insights_document = {}
 
 
         insights_document['date'] = data_item.timeframe_str
