@@ -61,6 +61,7 @@ class DataItem:
         def add_bar_labels(x,y):
             for i in range(len(x)):
                 plt.text(i, y[i] + 0.2, y[i], fontdict={"fontsize": 8, "weight": "bold"}, ha = "center")
+            
 
         x = df['date_str']
         y = df['price']
@@ -96,7 +97,7 @@ class DataItem:
         plt.title(title)
         plt.xlabel("Tunti")
         plt.ylabel("Hinta snt/kWh")
-        
+        plt.figtext(0.90, 0.05, "Lähde: ENTSO-E", fontsize=9)
 
         filename = f'{self.timeframe_str}.png'
         path = f"./images/{filename}"
@@ -237,7 +238,7 @@ class Timespan(DataItem):
         fig.set_size_inches(12,6)
         title = f"{self.title} (alv 0%)"
         plt.title(title)
-
+        plt.figtext(0.90, 0.05, "Lähde: ENTSO-E", fontsize=9)
         if settings['hourly']:
             plt.xticks(np.arange(-0.5, len(x), 24))
         
