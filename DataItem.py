@@ -105,21 +105,12 @@ class DataItem:
         im1 = Image.open(path)
         im2 = Image.open('./resources/legend_sb3.png')
 
-        legend_is_on_bars = False
+        
 
         max = df['price'].max()
-        treshold = max * 0.70
-        print('legend_treshold', treshold)
-        for val in y[0:5]:
-            if val > treshold:
-                legend_is_on_bars = True
+        legend_x, legend_y = legend_position(y, max, settings['bars_from_start'])
 
-        if legend_is_on_bars:
-            legend_x = 8
-            legend_y = 12
-        else:
-            legend_x = 170
-            legend_y = 90
+
 
         im1.paste(im2, (legend_x, legend_y))
         im1.save(path)

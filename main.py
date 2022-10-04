@@ -66,7 +66,7 @@ def tweet_day_ahead_report():
 
     if not data_item.dataframe.empty:
     
-        graph_settings = {"bar_labels": True}
+        graph_settings = {"bar_labels": True, "label_rotation": 0, "bars_from_start": 5, "bar_label_font_size": 8}
         data_item.plot_bar_graph(graph_settings)
         message = compile_day_ahead_message(data_item)
         
@@ -162,6 +162,7 @@ def retweet_day_report():
 
 if __name__ == "__main__":
     load_dotenv(".env")
+    
     
     schedule.every().day.at("14:10").do(tweet_day_ahead_report)
     schedule.every().day.at("07:00").do(retweet_day_report)
