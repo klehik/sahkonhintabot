@@ -1,9 +1,17 @@
 import matplotlib.pyplot as plt
 import logging
+from utils import format_price
 
-def add_bar_labels(x,y, fontsize):
+def add_bar_labels(x,y, max, fontsize):
     for i in range(len(x)):
-        plt.text(i, y[i] + 0.2, y[i], fontdict={"fontsize": fontsize, "weight": "bold"}, ha = "center")
+        offset = max / 95
+        print(offset)
+        if y[i] < 0:
+            offset = (offset * -1)
+            plt.text(i, y[i] + offset, format_price(y[i]), fontdict={"fontsize": fontsize, "weight": "bold"}, ha = "center", va="top")
+
+        else:
+            plt.text(i, y[i] + offset, format_price(y[i]), fontdict={"fontsize": fontsize, "weight": "bold"}, ha = "center")
     
 def legend_position(y, max, bars_from_start_or_end):
     legend_is_on_first_bars = False

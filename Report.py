@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import os
+from matplotlib.text import OffsetFrom
 import pandas as pd
 from entsoe import  EntsoePandasClient
-from utils import get_ranges
+from utils import get_ranges, format_price
 from PIL import Image
 import logging
 import numpy as np
@@ -61,10 +62,7 @@ class Report:
         logging.info("Plotting bar graph")
         df = self.dataframe
 
-        def add_bar_labels(x,y):
-            for i in range(len(x)):
-                plt.text(i, y[i] + 0.2, y[i], fontdict={"fontsize": 8, "weight": "bold"}, ha = "center")
-            
+                
 
         x = df['date_str']
         y = df['price']
@@ -79,6 +77,10 @@ class Report:
         ax.set_xticklabels(df['hour'])
         
         fig.set_size_inches(12,6)
+
+        max = df['price'].max()
+        mean = df['price'].mean()
+        min = df['price'].min()
        
         # bar chart
         col = []
@@ -93,7 +95,7 @@ class Report:
 
         plt.bar(x, y, color = col)
         if settings['bar_labels']:
-            add_bar_labels(x, y)
+            add_bar_labels(x, y, max, 7)
 
         title = f"Pörssisähkön tuntihinnat {self.timeframe_str} (alv 0%)"
 
@@ -101,7 +103,16 @@ class Report:
         plt.xlabel("Tunti")
         plt.ylabel("Hinta snt/kWh")
         plt.figtext(0.90, 0.04, "Lähde: ENTSO-E", fontsize=9)
-        plt.ylim((-0.5,5))
+
+        
+
+        if min < 0:
+            plt.ylim(bottom=min-(max/25 + 0.2))
+            plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
+        if max < 5:
+            plt.ylim(top=max*2)
+            
+
         filename = f'{self.timeframe_str}.png'
         path = f"./images/{filename}"
         plt.savefig(path)
@@ -111,7 +122,7 @@ class Report:
 
         
 
-        max = df['price'].max()
+        
         legend_x, legend_y = legend_position(y, max, settings['bars_from_start'])
 
 
@@ -224,10 +235,10 @@ class TimespanReport(Report):
             else:
                 col.append('red')
 
-
+        max = y.max()
         plt.bar(x, y, color = col)
         if not settings['hourly']:
-            add_bar_labels(x, y, settings['bar_label_font_size'])
+            add_bar_labels(x, y, max, settings['bar_label_font_size'])
 
 
 
