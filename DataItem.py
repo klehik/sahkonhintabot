@@ -92,12 +92,12 @@ class DataItem:
         if settings['bar_labels']:
             add_bar_labels(x, y)
 
-        title = f"Pörssisähkön hinta {self.timeframe_str} (alv 0%)"
+        title = f"Pörssisähkön tuntihinnat {self.timeframe_str} (alv 0%)"
 
         plt.title(title)
         plt.xlabel("Tunti")
         plt.ylabel("Hinta snt/kWh")
-        plt.figtext(0.90, 0.05, "Lähde: ENTSO-E", fontsize=9)
+        plt.figtext(0.90, 0.04, "Lähde: ENTSO-E", fontsize=9)
 
         filename = f'{self.timeframe_str}.png'
         path = f"./images/{filename}"
