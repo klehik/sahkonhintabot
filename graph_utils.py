@@ -5,7 +5,6 @@ from utils import format_price
 def add_bar_labels(x,y, max, fontsize):
     for i in range(len(x)):
         offset = max / 95
-        print(offset)
         if y[i] < 0:
             offset = (offset * -1)
             plt.text(i, y[i] + offset, format_price(y[i]), fontdict={"fontsize": fontsize, "weight": "bold"}, ha = "center", va="top")
