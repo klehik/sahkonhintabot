@@ -5,9 +5,12 @@ import pandas as pd
 from entsoe import  EntsoePandasClient
 from utils import get_ranges
 from PIL import Image
-
+import logging
 import numpy as np
 from graph_utils import add_bar_labels, legend_position
+import warnings
+warnings.filterwarnings("ignore")
+plt.set_loglevel(level="error")
 
 class DataItem:
     def __init__(self, start, end, title) -> None:
@@ -51,11 +54,11 @@ class DataItem:
         df['price_tax_24'] = round(df['price_€/MWh']*1.24 / 10, 2)
         df['price_tax_10'] = round(df['price_€/MWh']*1.1 / 10, 2)
         df['price'] = df['price_tax_0']
-        print(df)
         self.dataframe = df
         self.calculte_insights()
 
     def plot_bar_graph(self, settings):
+        logging.info("Plotting bar graph")
         df = self.dataframe
 
         def add_bar_labels(x,y):
@@ -147,14 +150,6 @@ class Day(DataItem):
 
         return periods
 
-    def calculte_insights(self):
-        df = self.dataframe
-
-        mean = df['price'].mean()
-        min = df['price'].min()
-        max = df['price'].max()
-
-        self.insights = {"mean": mean, "min": min, "max": max, "avg_7_day": self.avg_7_day, "avg_28_day": self.avg_28_day}
 
 
     def get_7_avg(self):
@@ -185,6 +180,7 @@ class Timespan(DataItem):
     
 
     def plot_bar_graph(self, settings):
+        logging.info("Plotting bar graph")
         df = self.dataframe
 
         df2 = pd.DataFrame()
