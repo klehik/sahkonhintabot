@@ -101,7 +101,7 @@ class Report:
         plt.xlabel("Tunti")
         plt.ylabel("Hinta snt/kWh")
         plt.figtext(0.90, 0.04, "Lähde: ENTSO-E", fontsize=9)
-
+        plt.ylim((-0.5,5))
         filename = f'{self.timeframe_str}.png'
         path = f"./images/{filename}"
         plt.savefig(path)
