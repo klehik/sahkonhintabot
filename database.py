@@ -56,20 +56,20 @@ def find_id(id):
 
     return id
 
-def add_insights(data_item, tweet_id):
+def add_insights(report, tweet_id):
 
     client = pymongo.MongoClient(os.getenv("MONGO_URI"))
     db = client.sahkonhintabot
     insights = db.insights
 
-    in_database = insights.find_one({"date": data_item.timeframe_str})
+    in_database = insights.find_one({"date": report.timeframe_str})
     print(in_database)
     if not in_database:
 
         insights_document = {}
 
 
-        insights_document['date'] = data_item.timeframe_str
+        insights_document['date'] = report.timeframe_str
         insights_document['tweet_id'] = tweet_id
            
 

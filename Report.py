@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings("ignore")
 plt.set_loglevel(level="error")
 
-class DataItem:
+class Report:
     def __init__(self, start, end, title) -> None:
         self.dataframe = None
         self.start = start
@@ -35,7 +35,7 @@ class DataItem:
         self.insights = {"mean": mean, "min": min, "max": max}
     
 
-    def init_data_item(self):
+    def init_report(self):
         start = pd.Timestamp(self.start, tz=self.tz)
         end = pd.Timestamp(self.end, tz=self.tz)
 
@@ -121,7 +121,7 @@ class DataItem:
 
         self.bar_graph_path = path
 
-class Day(DataItem):
+class DayReport(Report):
     def __init__(self, start, end, title):
         super().__init__(start, end, title)
         self.date = f"{self.start.day}.{self.start.month}.{self.start.year}"
@@ -156,22 +156,22 @@ class Day(DataItem):
         
         one_week = timedelta(days=7)
         title = f"Pörssisähkön 7 vrk:n tuntihinnat"
-        data_item = Timespan(start=self.end-one_week, end=self.end, title=title)
-        data_item.init_data_item()
+        report = TimespanReport(start=self.end-one_week, end=self.end, title=title)
+        report.init_report()
 
-        return data_item
+        return report
 
 
     def get_28_avg(self):
         
         one_month = timedelta(days=28)
         title = f"Pörssisähkön päiväkohtaiset keskihinnat"
-        data_item = Timespan(start=self.end-one_month, end=self.end, title=title)
-        data_item.init_data_item()
+        report = TimespanReport(start=self.end-one_month, end=self.end, title=title)
+        report.init_report()
 
-        return data_item
+        return report
 
-class Timespan(DataItem):
+class TimespanReport(Report):
     def __init__(self, start, end, title):
         super().__init__(start, end, title)
         self.title = title
