@@ -6,8 +6,8 @@ import calendar
 
 
 def format_price(value):
-    price = round(value, 2)
-    price = format(price, ".2f")
+    
+    price = format(value, ".2f")
     price = str(price).replace('.',',')
     return price
 

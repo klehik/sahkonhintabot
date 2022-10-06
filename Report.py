@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import os
-from matplotlib.text import OffsetFrom
+
 import pandas as pd
 from entsoe import  EntsoePandasClient
 from utils import get_ranges, format_price
@@ -51,9 +51,11 @@ class Report:
         df['day'] = df.index.day
         df['year'] = df.index.year
         df['hour'] = df.index.hour
-        df['price_tax_0'] = round(df['price_€/MWh']/10, 2)
-        df['price_tax_24'] = round(df['price_€/MWh']*1.24 / 10, 2)
-        df['price_tax_10'] = round(df['price_€/MWh']*1.1 / 10, 2)
+        
+        df['price_tax_0'] = df['price_€/MWh']/10
+
+        df['price_tax_24'] = df['price_€/MWh']*1.24 / 10
+        df['price_tax_10'] = df['price_€/MWh']*1.1 / 10
         df['price'] = df['price_tax_0']
         self.dataframe = df
         self.calculte_insights()
@@ -92,7 +94,7 @@ class Report:
             else:
                 col.append('red')
 
-
+        
         plt.bar(x, y, color = col)
         if settings['bar_labels']:
             add_bar_labels(x, y, max, 7)
