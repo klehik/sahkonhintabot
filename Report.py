@@ -236,9 +236,18 @@ class TimespanReport(Report):
                 col.append('red')
 
         max = y.max()
+        min = y.min()
+
         plt.bar(x, y, color = col)
         if not settings['hourly']:
             add_bar_labels(x, y, max, settings['bar_label_font_size'])
+
+
+        if min < 0:
+            plt.ylim(bottom=min-(max/25 + 0.2))
+            plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
+        if max < 5:
+            plt.ylim(top=max*2)
 
 
 
