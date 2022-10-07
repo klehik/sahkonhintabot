@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import os
-
+import decimal
 import pandas as pd
 from entsoe import  EntsoePandasClient
-from utils import get_ranges, format_price
+from utils import get_ranges, format_price, round_half_up
 from PIL import Image
 import logging
 import numpy as np
@@ -28,7 +28,10 @@ class Report:
     def calculte_insights(self):
         df = self.dataframe
 
-        mean = df['price'].mean()
+        mean = df['price_tax_0'].mean()
+        
+        mean = round_half_up(mean, decimals=2)
+        
         min = df['price'].min()
         max = df['price'].max()
        
@@ -51,15 +54,14 @@ class Report:
         df['day'] = df.index.day
         df['year'] = df.index.year
         df['hour'] = df.index.hour
-        
-        df['price_tax_0'] = df['price_€/MWh']/10
-
-        df['price_tax_24'] = df['price_€/MWh']*1.24 / 10
-        df['price_tax_10'] = df['price_€/MWh']*1.1 / 10
-        df['price'] = round(df['price_tax_0'], 2)
+        df['price_tax_0'] = (df['price_€/MWh']/10).map(lambda x: round_half_up(x,decimals=3))
+        # remember to deal taxes with negative price
+        df['price_tax_24'] = (df['price_€/MWh']*1.24 / 10).map(lambda x: round_half_up(x,decimals=3))
+        df['price_tax_10'] = (df['price_€/MWh']*1.1 / 10).map(lambda x: round_half_up(x,decimals=3))
+        df['price'] = df['price_tax_0'].map(lambda x: round_half_up(x,decimals=2))
         self.dataframe = df
         self.calculte_insights()
-
+        print(df)
     def plot_bar_graph(self, settings):
         logging.info("Plotting bar graph")
         df = self.dataframe
@@ -201,12 +203,14 @@ class TimespanReport(Report):
 
         df2['average_price'] = df.groupby('day')['price_€/MWh'].mean()
         df2['month'] = df.groupby('day')['month'].max()
-        df2['average_price'] = round(df2['average_price']/10, 2)
+        df2['average_price'] = (df2['average_price']/10).map(lambda x: round_half_up(x, decimals=2))
 
 
         df2.sort_values(['month', 'day'], inplace=True)
         df2.reset_index(inplace=True)
         df2['xtick_label'] = df2['day'].astype(str) + "." + df2['month'].astype(str)
+        print(df2)
+
 
         if settings['hourly']:
             x = df['date_str']

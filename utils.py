@@ -1,7 +1,8 @@
 
 from datetime import datetime
 import calendar
-
+import decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 
 
@@ -10,6 +11,25 @@ def format_price(value):
     price = format(value, ".2f")
     price = str(price).replace('.',',')
     return price
+
+def convert_to_ckwh(value):
+    value = round(value / 10, 2)
+    if value == -0:
+        print(value)
+        value = 0.0
+    return value 
+
+def round_half_up(val, decimals):
+    ctx = decimal.getcontext()
+    ctx.rounding = decimal.ROUND_HALF_UP
+    
+    val = Decimal(str(val))
+    
+    val = round(val,decimals)
+    val = float(val)
+    if val == -0.00:
+        val = 0.00
+    return val
 
 
 def get_ranges(nums):
