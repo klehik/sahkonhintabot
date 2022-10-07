@@ -56,7 +56,7 @@ class Report:
 
         df['price_tax_24'] = df['price_€/MWh']*1.24 / 10
         df['price_tax_10'] = df['price_€/MWh']*1.1 / 10
-        df['price'] = df['price_tax_0']
+        df['price'] = round(df['price_tax_0'], 2)
         self.dataframe = df
         self.calculte_insights()
 
