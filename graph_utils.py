@@ -9,6 +9,8 @@ def add_bar_labels(x,y, max, fontsize):
         
 
         formatted_price = format_price(y[i])
+        if formatted_price == "-0,00":
+            formatted_price = "0,00"
         if y[i] < 0:
             offset = (offset * -1)
             plt.text(i, y[i] + offset, formatted_price, fontdict={"fontsize": fontsize, "weight": "bold"}, ha = "center", va="top")
