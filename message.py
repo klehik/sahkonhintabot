@@ -29,13 +29,14 @@ def compile_day_ahead_message(data_item):
     
 
     below_average_message = f"{range_str} hinta pysyttelee alle vuorokauden keskiarvon\n"
-    for r in below_average_periods:
-        mean = str(r[2]).replace('.',',')
-        below_average_message+= f"{str(r[0])}.00 - {str(r[1])}.00, keskihinta {mean}\n"
+    if len(below_average_periods) <=3:
+        for r in below_average_periods:
+            mean = str(r[2]).replace('.',',')
+            below_average_message+= f"{str(r[0])}.00 - {str(r[1])}.00, keskihinta {mean}\n"
 
 
-    if (len(message) + len(below_average_message)) < 280:
-        message += below_average_message
+        if (len(message) + len(below_average_message)) < 280:
+            message += below_average_message
 
     if (len(message) + len(hashtags)) < 280:
         message += f"\n{hashtags}"
