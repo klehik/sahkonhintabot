@@ -61,7 +61,7 @@ class Report:
         df['price'] = df['price_tax_0'].map(lambda x: round_half_up(x,decimals=2))
         self.dataframe = df
         self.calculte_insights()
-        print(df)
+        
     def plot_bar_graph(self, settings):
         logging.info("Plotting bar graph")
         df = self.dataframe
@@ -115,6 +115,7 @@ class Report:
             plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
         if max < 5:
             plt.ylim(top=max*2)
+            max = max*2
             
 
         filename = f'{self.timeframe_str}.png'
@@ -168,9 +169,10 @@ class DayReport(Report):
 
 
     def get_7_avg(self):
+        days = 7
         
-        one_week = timedelta(days=7)
-        title = f"Pörssisähkön 7 vrk:n tuntihinnat"
+        one_week = timedelta(days=days)
+        title = f"Pörssisähkön {days} vrk:n tuntihinnat"
         report = TimespanReport(start=self.end-one_week, end=self.end, title=title)
         report.init_report()
 
@@ -178,8 +180,8 @@ class DayReport(Report):
 
 
     def get_28_avg(self):
-        
-        one_month = timedelta(days=28)
+        days = 28
+        one_month = timedelta(days=days)
         title = f"Pörssisähkön päiväkohtaiset keskihinnat"
         report = TimespanReport(start=self.end-one_month, end=self.end, title=title)
         report.init_report()
@@ -254,7 +256,7 @@ class TimespanReport(Report):
             plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
         if max < 5:
             plt.ylim(top=max*2)
-
+            max = max*2
 
 
         fig.set_size_inches(12,6)
