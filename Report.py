@@ -8,7 +8,7 @@ from utils import get_ranges, format_price, round_half_up
 from PIL import Image
 import logging
 import numpy as np
-from graph_utils import add_bar_labels, legend_position
+from graph_utils import add_bar_labels, legend_position, preprocess_dataframe
 import warnings
 warnings.filterwarnings("ignore")
 plt.set_loglevel(level="error")
@@ -18,23 +18,24 @@ class Report:
         self.dataframe = None
         self.start = start
         self.end = end
+        self.tax = os.getenv("TAX")
         self.country = os.getenv("COUNTRY")
         self.tz = os.getenv("TIMEZONE")
         self.bar_graph_path = None
         self.timeframe_str = f"{self.start.day}-{self.start.month}-{self.start.year}-{self.end.day}-{self.end.month}-{self.end.year}"
         self.insights = None
-        self.title = title
+        self.title = title + f' (alv {self.tax}%)'
 
-    def calculte_insights(self):
+    def calculate_insights(self):
         df = self.dataframe
 
-        mean = df['price_tax_0'].mean()
+        mean = df['price'].mean()
         
         mean = round_half_up(mean, decimals=2)
         
-        min = df['price'].min()
-        max = df['price'].max()
-       
+        min = df['price_rounded'].min()
+        max = df['price_rounded'].max()
+        
 
         self.insights = {"mean": mean, "min": min, "max": max}
     
@@ -46,105 +47,17 @@ class Report:
         client = EntsoePandasClient(os.getenv("ENTSO_API_KEY"))
         data = client.query_day_ahead_prices(self.country, start=start,end=end)
         df = data.to_frame()
-        df = df[:-1]
-        df.rename(columns = {0: "price_€/MWh"}, inplace = True)
-        df['date'] = df.index
-        df['date_str'] = df['date'].astype(str)
-        df['month'] = df.index.month
-        df['day'] = df.index.day
-        df['year'] = df.index.year
-        df['hour'] = df.index.hour
-        df['price_tax_0'] = (df['price_€/MWh']/10).map(lambda x: round_half_up(x,decimals=3))
-        # remember to deal taxes with negative price
-        df['price_tax_24'] = (df['price_€/MWh']*1.24 / 10).map(lambda x: round_half_up(x,decimals=3))
-        df['price_tax_10'] = (df['price_€/MWh']*1.1 / 10).map(lambda x: round_half_up(x,decimals=3))
-        df['price'] = df['price_tax_0'].map(lambda x: round_half_up(x,decimals=2))
-        self.dataframe = df
-        self.calculte_insights()
-        
-    def plot_bar_graph(self, settings):
-        logging.info("Plotting bar graph")
-        df = self.dataframe
+        self.dataframe = preprocess_dataframe(df, self.tax)
 
-                
-
-        x = df['date_str']
-        y = df['price']
-
-        plt.rc("font", size=18)          # controls default text sizes
-        
-        plt.rc("axes", labelsize=14)    # fontsize of the x and y labels
-        plt.rc("xtick", labelsize=14)    # fontsize of the tick labels
-        plt.rc("ytick", labelsize=14)    # fontsize of the tick labels
-     
-        fig, ax = plt.subplots()
-        ax.set_xticklabels(df['hour'])
-        
-        fig.set_size_inches(12,6)
-
-        max = df['price'].max()
-        mean = df['price'].mean()
-        min = df['price'].min()
-       
-        # bar chart
-        col = []
-        for val in y:
-            if val < 10:
-                col.append('green')
-            elif val <= 20:
-                col.append('orange')
-            else:
-                col.append('red')
-
-        
-        plt.bar(x, y, color = col)
-        if settings['bar_labels']:
-            add_bar_labels(x, y, max, 7)
-
-        title = f"Pörssisähkön tuntihinnat {self.timeframe_str} (alv 0%)"
-
-        plt.title(title)
-        plt.xlabel("Tunti")
-        plt.ylabel("Hinta snt/kWh")
-        plt.figtext(0.90, 0.04, "Lähde: ENTSO-E", fontsize=9)
-
-        
-
-        if min < 0:
-            plt.ylim(bottom=min-(max/25 + 0.2))
-            plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
-        if max < 5:
-            plt.ylim(top=max*2)
-            max = max*2
-            
-
-        filename = f'{self.timeframe_str}.png'
-        path = f"./images/{filename}"
-        plt.savefig(path)
-
-        im1 = Image.open(path)
-        im2 = Image.open('./resources/legend_sb3.png')
-
-        
-
-        
-        legend_x, legend_y = legend_position(y, max, settings['bars_from_start'])
+        self.calculate_insights()
 
 
 
-        im1.paste(im2, (legend_x, legend_y))
-        im1.save(path)
-
-        self.bar_graph_path = path
-
-class DayReport(Report):
+class DayAheadReport(Report):
     def __init__(self, start, end, title):
         super().__init__(start, end, title)
         self.date = f"{self.start.day}.{self.start.month}.{self.start.year}"
-        self.timeframe_str = f"{self.start.day}.{self.start.month}.{self.start.year}"
-        self.avg_7_day = self.get_7_avg()
-        self.avg_28_day = self.get_28_avg()
-    
+        self.timeframe_str = self.date
 
     def calculate_below_average_periods(self):
         
@@ -166,27 +79,73 @@ class DayReport(Report):
 
         return periods
 
+    def plot_bar_graph(self, settings):
+        logging.info("Plotting bar graph")
+        df = self.dataframe
 
+        x = df['date_str']
+        y = df['price_rounded']
 
-    def get_7_avg(self):
-        days = 7
+        plt.rc("font", size=18)          # controls default text sizes
+        plt.rc("axes", labelsize=14)    # fontsize of the x and y labels
+        plt.rc("xtick", labelsize=14)    # fontsize of the tick labels
+        plt.rc("ytick", labelsize=14)    # fontsize of the tick labels
+     
+        fig, ax = plt.subplots()
+        fig.set_size_inches(12,6)
+        ax.set_xticklabels(df['hour'])
+
+        max = self.insights['max']
+        mean = self.insights['mean']
+        min = self.insights['min']
+
         
-        one_week = timedelta(days=days)
-        title = f"Pörssisähkön {days} vrk:n tuntihinnat"
-        report = TimespanReport(start=self.end-one_week, end=self.end, title=title)
-        report.init_report()
+        # bar colors
+        col = []
+        for val in y:
+            if val < 10:
+                col.append('green')
+            elif val <= 20:
+                col.append('orange')
+            else:
+                col.append('red')
 
-        return report
+        
+        plt.bar(x, y, color = col)
+        if settings['bar_labels']:
+            add_bar_labels(x, y, max, 7)
 
+        
 
-    def get_28_avg(self):
-        days = 28
-        one_month = timedelta(days=days)
-        title = f"Pörssisähkön päiväkohtaiset keskihinnat"
-        report = TimespanReport(start=self.end-one_month, end=self.end, title=title)
-        report.init_report()
+        plt.title(self.title)
+        plt.xlabel("Tunti")
+        plt.ylabel("Hinta snt/kWh")
+        plt.figtext(0.90, 0.04, "Lähde: ENTSO-E", fontsize=9)
 
-        return report
+        
+
+        if min < 0:
+            plt.ylim(bottom=min-(max/25 + 0.2))
+            plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
+        if max < 5:
+            plt.ylim(top=max*2)
+            max = max*2
+            
+
+        filename = f'{self.date}.png'
+        path = f"./images/{filename}"
+        plt.savefig(path)
+
+        im1 = Image.open(path)
+        im2 = Image.open('./resources/legend_sb3.png')
+        
+        legend_x, legend_y = legend_position(y, max, settings['bars_from_start'])
+
+        im1.paste(im2, (legend_x, legend_y))
+        im1.save(path)
+
+        self.bar_graph_path = path
+
 
 class TimespanReport(Report):
     def __init__(self, start, end, title):
@@ -199,24 +158,25 @@ class TimespanReport(Report):
     def plot_bar_graph(self, settings):
         logging.info("Plotting bar graph")
         df = self.dataframe
-
+        print(df)
         df2 = pd.DataFrame()
 
 
         df2['average_price'] = df.groupby('day')['price_€/MWh'].mean()
         df2['month'] = df.groupby('day')['month'].max()
+        df2['year'] = df.groupby('day')['year'].max()
         df2['average_price'] = (df2['average_price']/10).map(lambda x: round_half_up(x, decimals=2))
 
 
-        df2.sort_values(['month', 'day'], inplace=True)
+        df2.sort_values(['year', 'month', 'day'], inplace=True)
         df2.reset_index(inplace=True)
         df2['xtick_label'] = df2['day'].astype(str) + "." + df2['month'].astype(str)
+        
         print(df2)
-
 
         if settings['hourly']:
             x = df['date_str']
-            y = df['price']  
+            y = df['price_rounded']  
             plt.xlabel("Tunti")
             
         else:
@@ -288,3 +248,5 @@ class TimespanReport(Report):
         self.bar_graph_path = path
 
         
+
+

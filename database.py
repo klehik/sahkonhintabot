@@ -1,63 +1,14 @@
 import pymongo
 import os
 from dotenv import load_dotenv
+import logging
+
+'''A simple database to save and load tweet ids for retweeting'''
 
 
-# A simple database to keep track of conversations the bot has already participated
 
-
-
-def get_id_db():
-    client = pymongo.MongoClient(os.getenv("MONGO_URI"))
-    db = client.sahkonhintabot
-    ids = db.conversation_ids
-
-    return ids
-
-
-def add_tweet(text, bot_replied):
-    client = pymongo.MongoClient(os.getenv("MONGO_URI"))
-    db = client.sahkonhintabot
-    tweets = db.tweets
-
-    tweet_document = {
-        "text": text,
-        "bot_replied": bot_replied
-    }
-    res = tweets.insert_one(tweet_document)
-    print(res)
-
-
-def get_tweets():
-
-    client = pymongo.MongoClient(os.getenv("MONGO_URI"))
-    db = client.sahkonhintabot
-    tweets = db.tweets
-
-    return tweets
-
-
-def add_id(id):
-
-    ids = get_id_db()
-    
-
-    id_document = {
-        "conversation_id": id
-    }
-    res = ids.insert_one(id_document)
-    print(res)
-
-def find_id(id):
-
-    ids = get_id_db()
-
-    id = ids.find_one({"conversation_id": id})
-
-    return id
-
-def add_insights(report, tweet_id):
-
+def add_tweet(report, tweet_id):
+    logging.info("Saving tweet id for report on {}".format(report.timeframe_str))
     client = pymongo.MongoClient(os.getenv("MONGO_URI"))
     db = client.sahkonhintabot
     insights = db.insights
@@ -76,8 +27,8 @@ def add_insights(report, tweet_id):
         res = insights.insert_one(insights_document)
         print(res)
 
-def get_insight(date):
-
+def get_tweet(date):
+    logging.info("Searching tweet id for report on {}".format(date))
     client = pymongo.MongoClient(os.getenv("MONGO_URI"))
     db = client.sahkonhintabot
     insights = db.insights
@@ -86,10 +37,4 @@ def get_insight(date):
     
     return insight
     
-
-def delete_id_db():
-    load_dotenv('.env')
-    ids = get_id_db()
-    ids.delete_many({})
-
 

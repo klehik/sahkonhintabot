@@ -1,11 +1,12 @@
 from utils import format_difference, format_percentage, format_price, get_month_name, format_difference
 from datetime import datetime
+import database
 
-def compile_day_ahead_message(data_item):
-    insights = data_item.insights
-    below_average_periods = data_item.calculate_below_average_periods()
+def compile_day_ahead_message(report):
+    insights = report.insights
+    below_average_periods = report.calculate_below_average_periods()
     #num_of_periods = len(below_average_periods)
-    hashtags = "#sähkö #energia"
+    hashtags = "#sähkönhinta"
     
     mean = format_price(insights['mean'])
     min = format_price(insights['min'])
@@ -17,14 +18,14 @@ def compile_day_ahead_message(data_item):
     else:
         range_str = "Ajanjakso, jossa"
 
-    message = f"Spot-hinnat {data_item.date}, snt/kWh (alv 0%)\n"
+    message = f"Spot-hinnat {report.date}, snt/kWh (alv 0%)\n"
     message += f"Alin: {min}\n"
     message += f"Ylin: {max}\n"
     message += f"Keskihinta: {mean}\n\n"
     
 
-    #message +=f"7vrk keskihinta: {format_price(data_item.avg_7_day.insights['mean'])}\n"
-    #message +=f"28vrk keskihinta: {format_price(data_item.avg_28_day.insights['mean'])}\n\n"
+    #message +=f"7vrk keskihinta: {format_price(report.avg_7_day.insights['mean'])}\n"
+    #message +=f"28vrk keskihinta: {format_price(report.avg_28_day.insights['mean'])}\n\n"
 
     
 
@@ -49,8 +50,8 @@ def compile_today_reply_message():
     message = "Tuntihinnat tänään"
     return message
 
-def compile_28_day_reply_message(data_item):
-    insights = data_item.insights
+def compile_28_day_message(report):
+    insights = report.insights
     mean = format_price(insights['mean'])
     min = format_price(insights['min'])
     max = format_price(insights['max'])
@@ -58,17 +59,17 @@ def compile_28_day_reply_message(data_item):
     message = f"28 vuorokauden keskihinta: {mean} snt/kWh"
     return message
 
-    pass
-def compile_7_day_reply_message(data_item):
-    insights = data_item.insights
+    
+def compile_7_day_message(report):
+    insights = report.insights
     mean = format_price(insights['mean'])
     message = f"7 vuorokauden keskihinta: {mean} snt/kWh"
     return message
 
-def compile_monthly_message(data_item_current, data_item_previous):
+def compile_monthly_message(report_current, report_previous):
 
-    insights_curr = data_item_current.insights
-    insights_prev = data_item_previous.insights
+    insights_curr = report_current.insights
+    insights_prev = report_previous.insights
 
     diff = insights_curr['mean'] - insights_prev['mean']
     diff_percent = diff / insights_prev['mean'] * 100
@@ -77,23 +78,23 @@ def compile_monthly_message(data_item_current, data_item_previous):
     max = format_price(insights_curr['max'])
     mean = format_price(insights_curr['mean'])
 
-    curr_month = get_month_name(data_item_current.start.month)
-    prev_month = get_month_name(data_item_previous.start.month)
+    curr_month = get_month_name(report_current.start.month)
+    prev_month = get_month_name(report_previous.start.month)
 
     message =  f"Pörssisähkön hinta {curr_month}ssa, snt/kWh (alv 0%)\n"
     message += f"Alin: {min}\n"
     message += f"Ylin: {max}\n"
     message += f"Keskihinta: {mean}\n"
-    message += f"Muutos {prev_month}hun: {format_difference(diff)} ({format_percentage(diff_percent)}%)\n"
+    message += f"Keskihinnan muutos {prev_month}hun: {format_difference(diff)} ({format_percentage(diff_percent)}%)\n"
 
-    message+= "\n#energia #sähkö #hinta"
+    message+= "\n#energia #sähkönhinta"
     print(len(message))
     return message
 
-def compile_weekly_message(data_item_current, data_item_previous):
+def compile_weekly_message(report_current, report_previous):
 
-    insights_curr = data_item_current.insights
-    insights_prev = data_item_previous.insights
+    insights_curr = report_current.insights
+    insights_prev = report_previous.insights
 
     diff = insights_curr['mean'] - insights_prev['mean']
     diff_percent = diff / insights_prev['mean'] * 100
@@ -117,9 +118,11 @@ def compile_weekly_message(data_item_current, data_item_previous):
 
 def compile_reply():
     now = datetime.now()
+    latest = database.get_latest()
 
-    img_path = f"./images/{str(now.day)}.{str(now.month)}.{str(now.year)}.png"
 
-    message = f"Pörssisähkön spot-hinnat tänään"
+    img_path = latest['latest_7_path']
+
+    message = f"Pörssisähkön 7 tuntihinnat, keskihinta {latest['latest_7_avg']} snt/kWh (alv 0%)"
 
     return message, img_path
