@@ -1,6 +1,7 @@
 from utils import format_difference, format_percentage, format_price, get_month_name, format_difference
 from datetime import datetime
 import database
+import os
 
 def compile_day_ahead_message(report):
     insights = report.insights
@@ -18,7 +19,9 @@ def compile_day_ahead_message(report):
     else:
         range_str = "Ajanjakso, jossa"
 
-    message = f"Spot-hinnat {report.date}, snt/kWh (alv 0%)\n"
+    tax = os.getenv("TAX")
+
+    message = f"Spot-hinnat {report.date}, snt/kWh (alv {tax}%)\n"
     message += f"Alin: {min}\n"
     message += f"Ylin: {max}\n"
     message += f"Keskihinta: {mean}\n\n"
@@ -81,7 +84,9 @@ def compile_monthly_message(report_current, report_previous):
     curr_month = get_month_name(report_current.start.month)
     prev_month = get_month_name(report_previous.start.month)
 
-    message =  f"Pörssisähkön hinta {curr_month}ssa, snt/kWh (alv 0%)\n"
+    tax = os.getenv("TAX")
+
+    message =  f"Pörssisähkön hinta {curr_month}ssa, snt/kWh (alv {tax}%)\n"
     message += f"Alin: {min}\n"
     message += f"Ylin: {max}\n"
     message += f"Keskihinta: {mean}\n"
@@ -103,7 +108,9 @@ def compile_weekly_message(report_current, report_previous):
     max = format_price(insights_curr['max'])
     mean = format_price(insights_curr['mean'])
 
-    message =  f"Pörssisähkön tuntihinnat tällä viikolla, snt/kWh (alv 0%)\n"
+    tax = os.getenv("TAX")
+
+    message =  f"Pörssisähkön tuntihinnat tällä viikolla, snt/kWh (alv {tax}%)\n"
     message += f"Alin: {min}\n"
     message += f"Ylin: {max}\n"
     message += f"Keskihinta: {mean}\n"
@@ -120,9 +127,9 @@ def compile_reply():
     now = datetime.now()
     latest = database.get_latest()
 
-
+    tax = os.getenv("TAX")
     img_path = latest['latest_7_path']
 
-    message = f"Pörssisähkön 7 tuntihinnat, keskihinta {latest['latest_7_avg']} snt/kWh (alv 0%)"
+    message = f"Pörssisähkön 7 tuntihinnat, keskihinta {latest['latest_7_avg']} snt/kWh (alv {tax}%)"
 
     return message, img_path

@@ -30,7 +30,8 @@ def tweet_reports():
     now = datetime.now()
     one_day = timedelta(days=1)
     tomorrow = now+one_day
-    report = generate_day_ahead_report(tomorrow)
+    end = tomorrow
+    report = generate_day_ahead_report(end)
     
 
     if not report.dataframe.empty:
@@ -42,14 +43,14 @@ def tweet_reports():
         logging.info("Day-ahead message: \n{}".format(message_day))
 
         # 7 day
-        report_7 = generate_7_day_report(tomorrow)
+        report_7 = generate_7_day_report(end)
         graph_settings_7 = {"hourly": True, "label_rotation": 0, "bars_from_start": 32}
         report_7.plot_bar_graph(graph_settings_7)
         message_7 = compile_7_day_message(report_7)
         logging.info("7-day message: {}".format(message_7))
     
         # 28 day
-        report_28 = generate_28_day_report(tomorrow)
+        report_28 = generate_28_day_report(end)
         graph_settings_28 = {"hourly": False, "label_rotation": 45, "bars_from_start": 6, "bar_label_font_size": 6}
         report_28.plot_bar_graph(graph_settings_28)
         message_28 = compile_28_day_message(report_28)
@@ -79,9 +80,10 @@ def tweet_reports():
 
 
 def tweet_monthly_report(now):
+
     
     is_hot = True if os.getenv("HOT") == 'True' else False
-    one_month = timedelta(days=35) # only to get previous month number
+    one_month = timedelta(days=35) # to get previous month number
 
     # current month
     report_current = generate_month_report(now)
@@ -124,7 +126,6 @@ if __name__ == "__main__":
     schedule.every().day.at("14:00").do(tweet_reports)
     schedule.every().day.at("07:00").do(retweet_day_report)
     schedule.every().day.at("11:00").do(check_if_last_day_of_month)
-    
 
     logging.info("Jobs scheduled: {}".format(schedule.get_jobs()))
     

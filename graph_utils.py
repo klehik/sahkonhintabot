@@ -4,9 +4,11 @@ from utils import format_price, round_half_up
 from datetime import datetime
 
 def add_bar_labels(x,y, max, fontsize):
+    # calculate relative bar label distance  
     for i in range(len(x)):
         
         offset = max / 90
+        
         if y[i] < 0:
             offset = (offset * -1)
             plt.text(i, y[i] + offset, format_price(y[i]), fontdict={"fontsize": fontsize, "weight": "bold"}, ha = "center", va="top")

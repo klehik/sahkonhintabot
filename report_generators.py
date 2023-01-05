@@ -17,7 +17,8 @@ def generate_day_ahead_report(date: datetime):
 
 def generate_7_day_report(date: datetime):
     logging.info("Generating 7-day report")
-    end = datetime(date.year, date.month, date.day+1, 0)
+    end = datetime(date.year, date.month, date.day, 0)
+    end = end + timedelta(days=1)
     days_7 = timedelta(days=7)
     title = f"Pörssisähkön 7 vrk:n tuntihinnat"
     report = TimespanReport(start=end-days_7, end=end, title=title)
@@ -28,7 +29,8 @@ def generate_7_day_report(date: datetime):
 def generate_28_day_report(date: datetime):
     logging.info("Generating 28-day report")
     
-    end = datetime(date.year, date.month, date.day+1, 0)
+    end = datetime(date.year, date.month, date.day, 0)
+    end = end + timedelta(days=1)
     days_28 = timedelta(days=28)
     title = f"Pörssisähkön päiväkohtaiset keskihinnat"
     report = TimespanReport(start=end-days_28, end=end, title=title)

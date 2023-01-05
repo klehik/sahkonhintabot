@@ -28,27 +28,22 @@ class Report:
 
     def calculate_insights(self):
         df = self.dataframe
-
         mean = df['price'].mean()
-        
         mean = round_half_up(mean, decimals=2)
-        
         min = df['price_rounded'].min()
         max = df['price_rounded'].max()
-        
-
         self.insights = {"mean": mean, "min": min, "max": max}
     
 
     def init_report(self):
+        # get data and preprocess dataframe
         start = pd.Timestamp(self.start, tz=self.tz)
         end = pd.Timestamp(self.end, tz=self.tz)
-
         client = EntsoePandasClient(os.getenv("ENTSO_API_KEY"))
         data = client.query_day_ahead_prices(self.country, start=start,end=end)
+        
         df = data.to_frame()
         self.dataframe = preprocess_dataframe(df, self.tax)
-
         self.calculate_insights()
 
 
@@ -86,10 +81,10 @@ class DayAheadReport(Report):
         x = df['date_str']
         y = df['price_rounded']
 
-        plt.rc("font", size=18)          # controls default text sizes
-        plt.rc("axes", labelsize=14)    # fontsize of the x and y labels
-        plt.rc("xtick", labelsize=14)    # fontsize of the tick labels
-        plt.rc("ytick", labelsize=14)    # fontsize of the tick labels
+        plt.rc("font", size=18) # controls default text sizes
+        plt.rc("axes", labelsize=14) # fontsize of the x and y labels
+        plt.rc("xtick", labelsize=14) # fontsize of the tick labels
+        plt.rc("ytick", labelsize=14) # fontsize of the tick labels
      
         fig, ax = plt.subplots()
         fig.set_size_inches(12,6)
@@ -99,7 +94,6 @@ class DayAheadReport(Report):
         mean = self.insights['mean']
         min = self.insights['min']
 
-        
         # bar colors
         col = []
         for val in y:
@@ -110,12 +104,11 @@ class DayAheadReport(Report):
             else:
                 col.append('red')
 
-        
         plt.bar(x, y, color = col)
-        if settings['bar_labels']:
-            add_bar_labels(x, y, max, 7)
-
         
+        # labels 
+        if settings['bar_labels']:   
+            add_bar_labels(x, y, max, 7)
 
         plt.title(self.title)
         plt.xlabel("Tunti")
@@ -123,7 +116,7 @@ class DayAheadReport(Report):
         plt.figtext(0.90, 0.04, "Lähde: ENTSO-E", fontsize=9)
 
         
-
+        # add ylim if prices are very low
         if min < 0:
             plt.ylim(bottom=min-(max/25 + 0.2))
             plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
@@ -131,16 +124,16 @@ class DayAheadReport(Report):
             plt.ylim(top=max*2)
             max = max*2
             
-
+        # save locally
         filename = f'{self.date}.png'
         path = f"./images/{filename}"
         plt.savefig(path)
 
+        # adding legend
         im1 = Image.open(path)
         im2 = Image.open('./resources/legend_sb3.png')
-        
+        # calculate legend position
         legend_x, legend_y = legend_position(y, max, settings['bars_from_start'])
-
         im1.paste(im2, (legend_x, legend_y))
         im1.save(path)
 
@@ -150,29 +143,24 @@ class DayAheadReport(Report):
 class TimespanReport(Report):
     def __init__(self, start, end, title):
         super().__init__(start, end, title)
-        self.title = title
         
-
-    
-
+        
     def plot_bar_graph(self, settings):
         logging.info("Plotting bar graph")
         df = self.dataframe
-        print(df)
+        
+        # another dataframe for daily averages
         df2 = pd.DataFrame()
-
-
-        df2['average_price'] = df.groupby('day')['price_€/MWh'].mean()
+        df2['average_price'] = df.groupby('day')['price'].mean()
         df2['month'] = df.groupby('day')['month'].max()
         df2['year'] = df.groupby('day')['year'].max()
-        df2['average_price'] = (df2['average_price']/10).map(lambda x: round_half_up(x, decimals=2))
-
+        # rounding
+        df2['average_price'] = (df2['average_price']).map(lambda x: round_half_up(x, decimals=2))
 
         df2.sort_values(['year', 'month', 'day'], inplace=True)
         df2.reset_index(inplace=True)
         df2['xtick_label'] = df2['day'].astype(str) + "." + df2['month'].astype(str)
         
-        print(df2)
 
         if settings['hourly']:
             x = df['date_str']
@@ -183,6 +171,7 @@ class TimespanReport(Report):
             x = df2['xtick_label'].tolist()
             y = df2['average_price']
             plt.xlabel("Päivä")
+        plt.ylabel("Hinta snt/kWh")
 
         plt.rc("font", size=18)          # controls default text sizes 
         plt.rc("axes", labelsize=14)    # fontsize of the x and y labels
@@ -210,7 +199,7 @@ class TimespanReport(Report):
         if not settings['hourly']:
             add_bar_labels(x, y, max, settings['bar_label_font_size'])
 
-
+        # add ylim if prices are very low and horizontal 0-line if prices are negative
         if min < 0:
             plt.ylim(bottom=min-(max/25 + 0.2))
             plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
@@ -218,33 +207,25 @@ class TimespanReport(Report):
             plt.ylim(top=max*2)
             max = max*2
 
-
         fig.set_size_inches(12,6)
-        title = f"{self.title} (alv 0%)"
-        plt.title(title)
+        plt.title(self.title)
         plt.figtext(0.90, 0.05, "Lähde: ENTSO-E", fontsize=9)
+
         if settings['hourly']:
             plt.xticks(np.arange(-0.5, len(x), 24))
         
-        plt.ylabel("Hinta snt/kWh")
-        
-
         filename = f'{self.timeframe_str}.png'
         path = f"./images/{filename}"
         plt.savefig(path)
 
+        # adding legend
         im1 = Image.open(path)
         im2 = Image.open('./resources/legend_sb3.png')
-
-      
-
-        max = y.max()
-
+        # calculate legend position
         legend_x, legend_y = legend_position(y, max, settings['bars_from_start'])
-
         im1.paste(im2, (legend_x, legend_y))
-        im1.save(path)
 
+        im1.save(path)
         self.bar_graph_path = path
 
         
