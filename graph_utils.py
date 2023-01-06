@@ -36,24 +36,28 @@ def legend_position(y, max, bars_from_start_or_end):
     else: 
         return 170, 90
 
-def preprocess_dataframe(df, tax):
+
+def add_tax_convert_ckwh(val, tax):
 
     tax_formatted = int(tax) / 100 + 1
+
+    if val < 0:
+        return round_half_up(val / 10, decimals=3)
+    else:
+        return round_half_up((val * tax_formatted)/ 10, decimals=3)
+
+def preprocess_dataframe(df, tax):
 
     df = df[:-1]
     df.rename(columns = {0: "price_€/MWh"}, inplace = True)
     df['date'] = df.index
     df['date_str'] = df['date'].astype(str)
-    
     df['month'] = df.index.month
     df['day'] = df.index.day
     df['year'] = df.index.year
     df['hour'] = df.index.hour
-    df['price'] = (df['price_€/MWh'] * tax_formatted / 10).map(lambda x: round_half_up(x,decimals=3))
-    #df['price_tax_0'] = (df['price_€/MWh']/10).map(lambda x: round_half_up(x,decimals=3))
-    # remember to deal taxes with negative price
-    #df['price_tax_24'] = (df['price_€/MWh']*1.24 / 10).map(lambda x: round_half_up(x,decimals=3))
-    #df['price_tax_10'] = (df['price_€/MWh']*1.1 / 10).map(lambda x: round_half_up(x,decimals=3))
+   
+    df['price'] = (df['price_€/MWh']).map(lambda x:  add_tax_convert_ckwh(x, tax))
     df['price_rounded'] = df['price'].map(lambda x: round_half_up(x,decimals=2))
     
     return df
