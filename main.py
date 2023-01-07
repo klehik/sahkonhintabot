@@ -68,7 +68,7 @@ def tweet_reports():
             tweet_28 = reply_to_tweet(message_28, report_28.bar_graph_path, tweet_7.id)
             
             # save first tweet id
-            database.add_tweet_id(report, tweet.id)
+            database.add_tweet(report, tweet.id)
 
         else:
             print("The bot is not hot")
@@ -122,10 +122,10 @@ if __name__ == "__main__":
     init_logger()
     logging.info("Setting up schedule, bot is hot: {}".format(os.getenv("HOT")))
 
-    schedule.every().day.at("14:00").do(tweet_reports)
+    schedule.every().day.at("14:01").do(tweet_reports)
     schedule.every().day.at("07:00").do(retweet_day_report)
     schedule.every().day.at("11:00").do(check_if_last_day_of_month)
-    
+          
     logging.info("Jobs scheduled: {}".format(schedule.get_jobs()))
     
     
