@@ -31,6 +31,8 @@ def tweet_reports():
     one_day = timedelta(days=1)
     tomorrow = now+one_day
     report = generate_day_ahead_report(tomorrow)
+
+   
     
 
     if not report.dataframe.empty:
@@ -38,10 +40,10 @@ def tweet_reports():
         # day ahead
         graph_settings = {"bar_labels": True, "label_rotation": 0, "bars_from_start": 5, "bar_label_font_size": 8}
         report.plot_bar_graph(graph_settings)
-        message_day = compile_day_ahead_message(report)
+        message_day = compile_day_ahead_message(report, 'below_average')
         logging.info("Day-ahead message: \n{}".format(message_day))
 
-        # 7 day
+         # 7 day
         report_7 = generate_7_day_report(tomorrow)
         graph_settings_7 = {"hourly": True, "label_rotation": 0, "bars_from_start": 32}
         report_7.plot_bar_graph(graph_settings_7)

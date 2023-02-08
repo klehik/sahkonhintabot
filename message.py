@@ -3,34 +3,17 @@ from datetime import datetime
 import database
 import os
 
-def compile_day_ahead_message(report):
-    insights = report.insights
+
+
+def compile_below_average_periods_message(report):
+
     below_average_periods = report.calculate_below_average_periods()
-    #num_of_periods = len(below_average_periods)
-    hashtags = "#sähkönhinta"
-    
-    mean = format_price(insights['mean'])
-    min = format_price(insights['min'])
-    max = format_price(insights['max'])
 
     range_str = ''
     if len(below_average_periods) > 1:
         range_str = "Ajanjaksot, joissa"
     else:
         range_str = "Ajanjakso, jossa"
-
-    tax = os.getenv("TAX")
-
-    message = f"Spot-hinnat {report.date}, snt/kWh (alv {tax}%)\n"
-    message += f"Alin: {min}\n"
-    message += f"Ylin: {max}\n"
-    message += f"Keskihinta: {mean}\n\n"
-    
-
-    #message +=f"7vrk keskihinta: {format_price(report.avg_7_day.insights['mean'])}\n"
-    #message +=f"28vrk keskihinta: {format_price(report.avg_28_day.insights['mean'])}\n\n"
-
-    
 
     below_average_message = f"{range_str} hinta pysyttelee alle vuorokauden keskiarvon\n"
     if len(below_average_periods) <=3:
@@ -39,13 +22,58 @@ def compile_day_ahead_message(report):
             below_average_message+= f"{str(r[0])}.00 - {str(r[1])}.00, keskihinta {mean}\n"
 
 
-        if (len(message) + len(below_average_message)) < 280:
-            message += below_average_message
+    return below_average_message
+
+
+def compile_average_periods_message(report):
+
+    df = report.dataframe
+    period08 =  df['price_rounded'].iloc[0:8]
+    period816 =  df['price_rounded'].iloc[7:16]
+    period1624 =  df['price_rounded'].iloc[15:24]
+    
+    period08_mean =  format_price(round(period08.mean(), 2))
+    period816_mean =  format_price(round(period816.mean(), 2))
+    period1624_mean =  format_price(round(period1624.mean(), 2))
+
+    message = 'Keskihinnat aikaväleillä\n'
+    message += f'0.00 - 8.00, {period08_mean}\n'
+    message += f'8.00 - 16.00, {period816_mean}\n'
+    message += f'16.00 - 24.00, {period1624_mean}\n'
+    
+    
+
+    return message
+
+
+
+def compile_day_ahead_message(report, type):
+    insights = report.insights
+    #num_of_periods = len(below_average_periods)
+    hashtags = "#sähkönhinta"
+    
+    mean = format_price(insights['mean'])
+    min = format_price(insights['min'])
+    max = format_price(insights['max'])
+
+    tax = os.getenv("TAX")
+
+    message = f"Spot-hinnat {report.date}, snt/kWh (alv {tax}%)\n"
+    message += f"Alin: {min}\n"
+    message += f"Ylin: {max}\n"
+    message += f"Keskihinta: {mean}\n\n"
+    
+    if type == 'below_average_periods':
+        seconary_message = compile_below_average_periods_message(report)
+    else:
+        seconary_message = compile_average_periods_message(report)
+    
+    if (len(message) + len(seconary_message)) < 280:
+            message += seconary_message
 
     if (len(message) + len(hashtags)) < 280:
         message += f"\n{hashtags}"
-    
-
+    print(len(message))
     return message
 
 def compile_today_reply_message():
