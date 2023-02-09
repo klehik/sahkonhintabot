@@ -28,7 +28,7 @@ def compile_below_average_periods_message(report):
 def compile_average_periods_message(report):
 
     df = report.dataframe
-    print(df)
+    
     """ period08 =  df['price'].iloc[0:8]
     period816 =  df['price'].iloc[7:16]
     period1624 =  df['price'].iloc[15:24] """
