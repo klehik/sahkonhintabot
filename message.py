@@ -1,8 +1,8 @@
-from utils import format_difference, format_percentage, format_price, get_month_name, format_difference
+from utils import format_difference, format_percentage, format_price, get_month_name, format_difference, round_half_up
 from datetime import datetime
 import database
 import os
-
+import numpy as np
 
 
 def compile_below_average_periods_message(report):
@@ -28,13 +28,20 @@ def compile_below_average_periods_message(report):
 def compile_average_periods_message(report):
 
     df = report.dataframe
-    period08 =  df['price_rounded'].iloc[0:8]
-    period816 =  df['price_rounded'].iloc[7:16]
-    period1624 =  df['price_rounded'].iloc[15:24]
+    print(df)
+    """ period08 =  df['price'].iloc[0:8]
+    period816 =  df['price'].iloc[7:16]
+    period1624 =  df['price'].iloc[15:24] """
+
+    df_split = np.array_split(df['price_rounded'], 3)
+
+    period08 =  df_split[0]
+    period816 =  df_split[1]
+    period1624 =  df_split[2]
     
-    period08_mean =  format_price(round(period08.mean(), 2))
-    period816_mean =  format_price(round(period816.mean(), 2))
-    period1624_mean =  format_price(round(period1624.mean(), 2))
+    period08_mean =  format_price(round_half_up(period08.mean(), 2))
+    period816_mean =  format_price(round_half_up(period816.mean(), 2))
+    period1624_mean =  format_price(round_half_up(period1624.mean(), 2))
 
     message = 'Keskihinnat aikaväleillä\n'
     message += f'0.00 - 8.00, {period08_mean}\n'
