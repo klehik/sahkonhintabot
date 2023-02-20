@@ -125,6 +125,9 @@ class DayAheadReport(Report):
         """ if max < 5:
             plt.ylim(top=max*2)
             max = max*2 """
+        if max > 19 and max < 20:
+            max = 21
+            plt.ylim(top=max)   
         if max < 20:
             plt.ylim(top=20)
             max = 20
@@ -208,9 +211,13 @@ class TimespanReport(Report):
         if min < 0:
             plt.ylim(bottom=min-(max/25 + 0.2))
             plt.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
+        if max > 19 and max < 20:
+            max = 21
+            plt.ylim(top=max)   
         if max < 20:
-            plt.ylim(top=20)
             max = 20
+            plt.ylim(top=max)
+            
 
         fig.set_size_inches(12,6)
         plt.title(self.title)
