@@ -149,7 +149,7 @@ class DayAheadReport(Report):
 class TimespanReport(Report):
     def __init__(self, start, end, title):
         super().__init__(start, end, title)
-        self.title = title + f" (alv 10/{self.tax}%)"
+        self.title = title
 
     def plot_bar_graph(self, settings):
         logging.info("Plotting bar graph")
@@ -168,16 +168,19 @@ class TimespanReport(Report):
         df2.sort_values(["year", "month", "day"], inplace=True)
         df2.reset_index(inplace=True)
         df2["xtick_label"] = df2["day"].astype(str) + "." + df2["month"].astype(str)
-
+        title = self.title
         if settings["hourly"]:
             x = df["date_str"]
             y = df["price_rounded"]
             plt.xlabel("Tunti")
 
+            self.title = title + f" (alv {self.tax}%)"
+
         else:
             x = df2["xtick_label"].tolist()
             y = df2["average_price"]
             plt.xlabel("Päivä")
+            self.title = title + f" (alv 10/{self.tax}%)"
         plt.ylabel("Hinta snt/kWh")
 
         plt.rc("font", size=18)  # controls default text sizes
