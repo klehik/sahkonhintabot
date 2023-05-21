@@ -137,7 +137,7 @@ class DayAheadReport(Report):
 
         # adding legend
         im1 = Image.open(path)
-        im2 = Image.open("./resources/legend_sb3.png")
+        im2 = Image.open("./resources/legend_v2.png")
         # calculate legend position
         legend_x, legend_y = legend_position(y, max, settings["bars_from_start"])
         im1.paste(im2, (legend_x, legend_y))
@@ -234,7 +234,7 @@ class TimespanReport(Report):
 
         # adding legend
         im1 = Image.open(path)
-        im2 = Image.open("./resources/legend_sb3.png")
+        im2 = Image.open("./resources/legend_v2.png")
         # calculate legend position
         legend_x, legend_y = legend_position(y, max, settings["bars_from_start"])
         im1.paste(im2, (legend_x, legend_y))

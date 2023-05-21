@@ -45,9 +45,9 @@ def legend_position(y, max, bars_from_start_or_end):
             legend_is_on_last_bars = True
 
     if legend_is_on_first_bars and legend_is_on_last_bars:
-        return 8, 12
+        return 1085, 90
     elif legend_is_on_first_bars:
-        return 880, 90
+        return 950, 90
     else:
         return 170, 90
 
