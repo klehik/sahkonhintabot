@@ -180,7 +180,7 @@ class TimespanReport(Report):
             x = df2["xtick_label"].tolist()
             y = df2["average_price"]
             plt.xlabel("Päivä")
-            self.title = title + f" (alv 10/{self.tax}%)"
+            self.title = title + f" (alv {self.tax}%)"
         plt.ylabel("Hinta snt/kWh")
 
         plt.rc("font", size=18)  # controls default text sizes
@@ -223,7 +223,6 @@ class TimespanReport(Report):
         fig.set_size_inches(12, 6)
         plt.title(self.title)
         plt.figtext(0.90, 0.05, "Lähde: ENTSO-E", fontsize=9)
-        plt.figtext(0.42, 0.95, "1.5 alkaen alv 24%", fontsize=9)
 
         if settings["hourly"]:
             plt.xticks(np.arange(-0.5, len(x), 24))
