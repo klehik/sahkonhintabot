@@ -4,7 +4,7 @@ import os
 import decimal
 import pandas as pd
 from entsoe import EntsoePandasClient
-from utils import get_ranges, format_price, round_half_up
+from utils import get_ranges, format_price, round_half_up, get_missing_data
 from PIL import Image
 import logging
 import numpy as np
@@ -13,6 +13,8 @@ import warnings
 
 warnings.filterwarnings("ignore")
 plt.set_loglevel(level="error")
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', None)
 
 
 class Report:
@@ -42,8 +44,24 @@ class Report:
         end = pd.Timestamp(self.end, tz=self.tz)
         client = EntsoePandasClient(os.getenv("ENTSO_API_KEY"))
         data = client.query_day_ahead_prices(self.country, start=start, end=end)
+        print(
+            '2023-05-28 00:00:00+03:00' in data.index
+            and '2023-05-28 15:00:00+03:00' not in data.index
+        )
+        
+        if (
+            '2023-05-28 00:00:00+03:00' in data.index
+            and '2023-05-28 15:00:00+03:00' not in data.index
+        ):
+        # add missing data from one day
+            missing_data = get_missing_data()
+            df = pd.concat([data, missing_data], axis=1)
+            df.iloc[:, 0].fillna(df.iloc[:, 1], inplace=True)
+            df.drop(df.columns[[1]], inplace=True, axis=1)
 
-        df = data.to_frame()
+        else:
+            df = data.to_frame()
+
         self.dataframe = preprocess_dataframe(df, self.tax)
         self.calculate_insights()
 
