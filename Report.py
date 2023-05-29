@@ -44,16 +44,13 @@ class Report:
         end = pd.Timestamp(self.end, tz=self.tz)
         client = EntsoePandasClient(os.getenv("ENTSO_API_KEY"))
         data = client.query_day_ahead_prices(self.country, start=start, end=end)
-        print(
-            '2023-05-28 00:00:00+03:00' in data.index
-            and '2023-05-28 15:00:00+03:00' not in data.index
-        )
-        
+
+        # check if data is missing from May 28
         if (
             '2023-05-28 00:00:00+03:00' in data.index
             and '2023-05-28 15:00:00+03:00' not in data.index
         ):
-        # add missing data from one day
+            # add missing data from one day
             missing_data = get_missing_data()
             df = pd.concat([data, missing_data], axis=1)
             df.iloc[:, 0].fillna(df.iloc[:, 1], inplace=True)
