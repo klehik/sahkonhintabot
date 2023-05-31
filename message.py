@@ -132,8 +132,8 @@ def compile_monthly_message(report_current, report_previous):
     tax = os.getenv("TAX")
 
     message = f"Pörssisähkön hinta {curr_month}ssa, snt/kWh (alv {tax}%)\n"
-    message += f"Alin: {min}\n"
-    message += f"Ylin: {max}\n"
+    message += f"Halvin tunti: {min}\n"
+    message += f"Kallein tunti: {max}\n"
     message += f"Keskihinta: {mean}\n"
     message += f"Keskihinnan muutos {prev_month}hun: {format_difference(diff)} ({format_percentage(diff_percent)}%)\n"
 

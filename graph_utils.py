@@ -63,7 +63,7 @@ def add_tax_convert_ckwh(val, tax):
 
 
 def add_tax_convert_ckwh_row(row, tax):
-
+    # calculating tax for months that has temporary tax change
     new_row = []
     tax_formatted = int(tax) / 100 + 1
     for indx, val in row.items():
@@ -94,9 +94,9 @@ def preprocess_dataframe(df, tax):
     df["year"] = df.index.year
     df["hour"] = df.index.hour
 
-    df["price"] = add_tax_convert_ckwh_row(df["price_€/MWh"], tax)
-
+    # df["price"] = add_tax_convert_ckwh_row(df["price_€/MWh"], tax)
+    df['price'] = (df['price_€/MWh']).map(lambda x: add_tax_convert_ckwh(x, tax))
     df["price_rounded"] = df["price"].map(lambda x: round_half_up(x, decimals=2))
-    print(df)
+
     return df
 
