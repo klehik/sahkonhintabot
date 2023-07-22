@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 import schedule
 import time
-from twitter import tweet_with_image, retweet, reply_to_tweet
+from twitter import tweet_with_image_v2, retweet, reply_with_image_v2, upload_media
 from utils import get_days_in_month
 from message import *
 import database
@@ -56,16 +56,23 @@ def tweet_reports():
         if is_hot:
 
             # tweet day ahead
-            tweet = tweet_with_image(report.bar_graph_path, message_day)
+            media = upload_media([report.bar_graph_path])
+            tweet = tweet_with_image_v2(media, message_day)
 
             # reply to day ahead tweet
-            tweet_7 = reply_to_tweet(message_7, report_7.bar_graph_path, tweet.id)
+            media_7 = upload_media([report_7.bar_graph_path])
+            tweet_7 = reply_with_image_v2(
+                media_ids=media_7, message=message_7, tweet_id=tweet.data["id"]
+            )
 
             # reply to 7 day tweet
-            tweet_28 = reply_to_tweet(message_28, report_28.bar_graph_path, tweet_7.id)
+            media_28 = upload_media([report_28.bar_graph_path])
+            tweet_28 = reply_with_image_v2(
+                media_ids=media_28, message=message_28, tweet_id=tweet_7.data["id"]
+            )
 
             # save first tweet id
-            database.add_tweet(report, tweet.id)
+            database.add_tweet(report, tweet.data["id"])
 
         else:
             print("The bot is not hot")
@@ -97,7 +104,7 @@ def tweet_monthly_report(now):
     print(message)
 
     if is_hot:
-        tweet_with_image(report_current.bar_graph_path, message)
+        tweet_with_image_v2(report_current.bar_graph_path, message)
 
     else:
         logging.info("The bot is not hot")
@@ -129,7 +136,7 @@ if __name__ == "__main__":
     logging.info("Setting up schedule, bot is hot: {}".format(os.getenv("HOT")))
 
     schedule.every().day.at("14:10").do(tweet_reports)
-    schedule.every().day.at("07:00").do(retweet_day_report)
+    # schedule.every().day.at("07:00").do(retweet_day_report)
     schedule.every().day.at("11:00").do(check_if_last_day_of_month)
 
     logging.info("Jobs scheduled: {}".format(schedule.get_jobs()))

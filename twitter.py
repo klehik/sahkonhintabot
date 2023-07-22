@@ -2,6 +2,7 @@ import tweepy
 import os
 import logging
 
+
 def twitter_api():
     # Twitter API v1
     logging.info("Setting up twitter API v1 connection..")
@@ -11,12 +12,11 @@ def twitter_api():
     consumer_secret = os.getenv("CONSUMER_KEY_SECRET")
 
     auth = tweepy.OAuth1UserHandler(
-        consumer_key, 
-        consumer_secret, 
-        access_token,
-        access_token_secret)
+        consumer_key, consumer_secret, access_token, access_token_secret
+    )
     api = tweepy.API(auth)
     return api
+
 
 def twitter_client():
     # Twitter API v2
@@ -29,9 +29,12 @@ def twitter_client():
     consumer_key = os.getenv("CONSUMER_KEY")
     consumer_secret = os.getenv("CONSUMER_KEY_SECRET")
 
-    client = tweepy.Client(bearer, consumer_key, consumer_secret, access_token, access_token_secret)
-   
+    client = tweepy.Client(
+        bearer, consumer_key, consumer_secret, access_token, access_token_secret
+    )
+
     return client
+
 
 def upload_media(files):
     media_ids = []
@@ -43,40 +46,63 @@ def upload_media(files):
     return media_ids
 
 
+def tweet_with_image_v2(media_ids, message):
+    api = twitter_client()
+
+    tweet = api.create_tweet(text=message, media_ids=media_ids)
+    return tweet
+
+
+def reply_with_image_v2(media_ids, message, tweet_id):
+    api = twitter_client()
+
+    tweet = api.create_tweet(
+        text=message, media_ids=media_ids, in_reply_to_tweet_id=tweet_id
+    )
+    return tweet
+
+
 def tweet_with_multi_image(media_ids, message):
-    api=twitter_api()
+    api = twitter_api()
     return api.update_status(status=message, media_ids=media_ids)
-    
+
 
 def reply_to_tweet(message, image_path, tweet_id):
     api = twitter_api()
     logging.info("Replying to tweet: {}".format(tweet_id))
-    return api.update_status_with_media(status=message ,filename=image_path, in_reply_to_status_id=tweet_id)
-
+    return api.update_status_with_media(
+        status=message, filename=image_path, in_reply_to_status_id=tweet_id
+    )
 
 
 def tweet_with_image(image_path: str, message: str):
     api = twitter_api()
     logging.info("Tweeting with image: {}".format(image_path))
-    return api.update_status_with_media(message ,image_path)
-    
-    #os.remove(image_path)
+    return api.update_status_with_media(message, image_path)
+
+    # os.remove(image_path)
 
 
 def retweet(id):
     api = twitter_api()
     logging.info("Retweeting, tweet id: {}".format(id))
     api.retweet(id)
-    
+
 
 def get_tweet(id):
 
     client = twitter_client()
 
-    res = client.get_tweet(id, expansions='author_id,in_reply_to_user_id,referenced_tweets.id', user_fields='name,username', tweet_fields='author_id,conversation_id,created_at,in_reply_to_user_id,referenced_tweets')
+    res = client.get_tweet(
+        id,
+        expansions='author_id,in_reply_to_user_id,referenced_tweets.id',
+        user_fields='name,username',
+        tweet_fields='author_id,conversation_id,created_at,in_reply_to_user_id,referenced_tweets',
+    )
 
-    #print(res.includes['users'], res.data.conversation_id)
+    # print(res.includes['users'], res.data.conversation_id)
     return res
+
 
 def get_conversation_id(id):
     tweet = get_tweet(id)
