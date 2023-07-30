@@ -104,7 +104,7 @@ def tweet_monthly_report(now):
     print(message)
 
     if is_hot:
-        monthly_graph_media = upload_media(report_current.bar_graph_path)
+        monthly_graph_media = upload_media([report_current.bar_graph_path])
         tweet_with_image_v2(media_ids=monthly_graph_media, message=message)
 
     else:
