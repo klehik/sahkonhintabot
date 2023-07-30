@@ -104,7 +104,8 @@ def tweet_monthly_report(now):
     print(message)
 
     if is_hot:
-        tweet_with_image_v2(report_current.bar_graph_path, message)
+        monthly_graph_media = upload_media(report_current.bar_graph_path)
+        tweet_with_image_v2(media_ids=monthly_graph_media, message=message)
 
     else:
         logging.info("The bot is not hot")
@@ -136,7 +137,7 @@ if __name__ == "__main__":
     logging.info("Setting up schedule, bot is hot: {}".format(os.getenv("HOT")))
 
     schedule.every().day.at("14:10").do(tweet_reports)
-    # schedule.every().day.at("07:00").do(retweet_day_report)
+    schedule.every().day.at("07:00").do(retweet_day_report)
     schedule.every().day.at("11:00").do(check_if_last_day_of_month)
 
     logging.info("Jobs scheduled: {}".format(schedule.get_jobs()))
