@@ -73,7 +73,8 @@ def tweet_reports():
 
             # save first tweet id
             database.add_tweet(report, tweet.data["id"])
-
+            #shutdown
+            os.system('sudo shutdown now')
         else:
             print("The bot is not hot")
     else:
@@ -135,10 +136,10 @@ if __name__ == "__main__":
 
     init_logger()
     logging.info("Setting up schedule, bot is hot: {}".format(os.getenv("HOT")))
-
+    
     schedule.every().day.at("14:10").do(tweet_reports)
-    schedule.every().day.at("07:00").do(retweet_day_report)
-    schedule.every().day.at("11:00").do(check_if_last_day_of_month)
+    #schedule.every().day.at("13:24").do(retweet_day_report)
+    schedule.every().day.at("13:00").do(check_if_last_day_of_month)
 
     logging.info("Jobs scheduled: {}".format(schedule.get_jobs()))
 

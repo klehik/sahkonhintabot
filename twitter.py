@@ -86,7 +86,7 @@ def tweet_with_image(image_path: str, message: str):
 def retweet(id):
     api = twitter_client()
     logging.info("Retweeting, tweet id: {}".format(id))
-    api.retweet(id)
+    api.retweet(id, False)
 
 
 def get_tweet(id):

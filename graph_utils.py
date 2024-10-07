@@ -54,7 +54,7 @@ def legend_position(y, max, bars_from_start_or_end):
 
 def add_tax_convert_ckwh(val, tax):
 
-    tax_formatted = int(tax) / 100 + 1
+    tax_formatted = float(tax) / 100 + 1
 
     if val < 0:
         return round_half_up(val / 10, decimals=3)
@@ -65,7 +65,7 @@ def add_tax_convert_ckwh(val, tax):
 def add_tax_convert_ckwh_row(row, tax):
     # calculating tax for months that has temporary tax change
     new_row = []
-    tax_formatted = int(tax) / 100 + 1
+    tax_formatted = float(tax) / 100 + 1
     for indx, val in row.items():
 
         if indx.month <= 4:
