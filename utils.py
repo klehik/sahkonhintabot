@@ -2,7 +2,7 @@ from datetime import datetime
 import calendar
 import decimal
 from decimal import Decimal, ROUND_HALF_UP
-
+import os
 
 def format_price(value):
 
@@ -81,6 +81,16 @@ def format_percentage(value):
     value = str(value).replace('.', ',')
 
     return prefix + value
+
+
+def remove_file(file_path: str):
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except Exception as e:
+            print(f"Error removing file {file_path}: {e}")
+    else:
+        print(f"File does not exist: {file_path}")
 
 
 def get_missing_data():

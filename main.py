@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import schedule
 import time
 from twitter import tweet_with_image_v2, retweet, reply_with_image_v2, upload_media
-from utils import get_days_in_month
+from utils import get_days_in_month, remove_file
 from message import *
 import database
 from report_generators import *
@@ -73,6 +73,11 @@ def tweet_reports():
 
             # save first tweet id
             database.add_tweet(report, tweet.data["id"])
+
+            remove_file(report.bar_graph_path)
+            remove_file(report_7.bar_graph_path)
+            remove_file(report_28.bar_graph_path)
+
             #shutdown
             os.system('sudo shutdown now')
         else:
@@ -107,6 +112,7 @@ def tweet_monthly_report(now):
     if is_hot:
         monthly_graph_media = upload_media([report_current.bar_graph_path])
         tweet_with_image_v2(media_ids=monthly_graph_media, message=message)
+        remove_file(report_current.bar_graph_path)
 
     else:
         logging.info("The bot is not hot")
