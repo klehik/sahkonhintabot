@@ -119,12 +119,17 @@ def compile_monthly_message(report_current, report_previous):
     insights_curr = report_current.insights
     insights_prev = report_previous.insights
 
+    timespan_insights = report_current.timespan_insights
+
     diff = insights_curr["mean"] - insights_prev["mean"]
     diff_percent = diff / insights_prev["mean"] * 100
 
-    min = format_price(insights_curr["min"])
-    max = format_price(insights_curr["max"])
     mean = format_price(insights_curr["mean"])
+
+    mean_min = format_price(timespan_insights["timespan_min"])
+    mean_max = format_price(timespan_insights["timespan_max"])
+    mean_min_day = timespan_insights["timespan_min_day"]
+    mean_max_day = timespan_insights["timespan_max_day"]
 
     curr_month = get_month_name(report_current.start.month)
     prev_month = get_month_name(report_previous.start.month)
@@ -132,8 +137,8 @@ def compile_monthly_message(report_current, report_previous):
     tax = os.getenv("TAX")
 
     message = f"Pörssisähkön hinta {curr_month}ssa, snt/kWh (alv {tax}%)\n"
-    message += f"Halvin tunti: {min}\n"
-    message += f"Kallein tunti: {max}\n"
+    message += f"Halvin päivä: {mean_min} ({mean_min_day})\n"
+    message += f"Kallein päivä: {mean_max} ({mean_max_day})\n"
     message += f"Keskihinta: {mean}\n"
     message += f"Keskihinnan muutos {prev_month}hun: {format_difference(diff)} ({format_percentage(diff_percent)}%)\n"
 

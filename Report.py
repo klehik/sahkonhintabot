@@ -45,7 +45,12 @@ class Report:
         client = EntsoePandasClient(os.getenv("ENTSO_API_KEY"))
         data = client.query_day_ahead_prices(self.country, start=start, end=end)
 
-        df = data.to_frame()
+        if data.index.freq != 'H':
+            data_60min = data.resample('H').mean()
+        else:
+            data_60min = data
+
+        df = data_60min.to_frame()
 
         self.dataframe = preprocess_dataframe(df, self.tax)
         self.calculate_insights()
@@ -153,6 +158,7 @@ class TimespanReport(Report):
     def __init__(self, start, end, title):
         super().__init__(start, end, title)
         self.title = title
+        self.timespan_insights = None
 
     def plot_bar_graph(self, settings):
         logging.info("Plotting bar graph")
@@ -167,6 +173,23 @@ class TimespanReport(Report):
         df2["average_price"] = (df2["average_price"]).map(
             lambda x: round_half_up(x, decimals=2)
         )
+
+        
+        timespan_min = df2['average_price'].min()
+        timespan_min_day_idx = df2['average_price'].idxmin()  # this is the day index
+        timespan_min_day = f"{timespan_min_day_idx}.{df2.loc[timespan_min_day_idx, 'month']}.{df2.loc[timespan_min_day_idx, 'year']}"
+
+        
+        timespan_max = df2['average_price'].max()
+        timespan_max_day_idx = df2['average_price'].idxmax()  # this is the day index
+        timespan_max_day = f"{timespan_max_day_idx}.{df2.loc[timespan_max_day_idx, 'month']}.{df2.loc[timespan_max_day_idx, 'year']}"
+
+        self.timespan_insights = {
+            "timespan_min": timespan_min,
+            "timespan_max": timespan_max,
+            "timespan_min_day": timespan_min_day,
+            "timespan_max_day": timespan_max_day,
+        }
 
         df2.sort_values(["year", "month", "day"], inplace=True)
         df2.reset_index(inplace=True)
